@@ -328,14 +328,16 @@ pub(crate) fn parse_openai_chunk(
     let chunk: OpenAiStreamChunk = serde_json::from_str(json)
         .map_err(|e| ProviderError::InvalidResponse(format!("malformed stream chunk: {e}")))?;
 
+    // Emit in content order: text/tool-call deltas first, then usage
+    // accounting, then the terminal `Done` — kept consistent with the same
+    // policy in `gemini.rs`. In practice OpenAI sends `finish_reason` and
+    // `usage` in separate chunks (the latter only when
+    // `stream_options.include_usage` is set, with an empty `choices`
+    // array), so this ordering rarely matters for real traffic, but it
+    // keeps behavior well-defined when a chunk happens to carry more than
+    // one of these at once.
     let mut events = Vec::new();
-
-    if let Some(usage) = chunk.usage {
-        events.push(ChatEvent::Usage(TokenUsage {
-            input_tokens: usage.prompt_tokens,
-            output_tokens: usage.completion_tokens,
-        }));
-    }
+    let mut finish_reason = None;
 
     for choice in chunk.choices {
         if let Some(content) = choice.delta.content {
@@ -360,10 +362,19 @@ pub(crate) fn parse_openai_chunk(
             });
         }
         if let Some(reason) = choice.finish_reason {
-            events.push(ChatEvent::Done {
-                finish_reason: map_finish_reason(&reason),
-            });
+            finish_reason = Some(map_finish_reason(&reason));
         }
+    }
+
+    if let Some(usage) = chunk.usage {
+        events.push(ChatEvent::Usage(TokenUsage {
+            input_tokens: usage.prompt_tokens,
+            output_tokens: usage.completion_tokens,
+        }));
+    }
+
+    if let Some(finish_reason) = finish_reason {
+        events.push(ChatEvent::Done { finish_reason });
     }
 
     Ok(events)

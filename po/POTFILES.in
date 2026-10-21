@@ -1,0 +1,12 @@
+# List one file per line relative to the repository root. Run
+# `ninja -C _build nexus-pot` (meson's i18n.gettext target) to regenerate
+# po/nexus.pot from these.
+#
+# NOTE (see docs/LIMITATIONS.md): the GTK UI scaffold does not yet wrap
+# its Rust-side user-visible strings in gettext() calls (the `gettextrs`
+# crate is not yet a dependency). Add those calls and list the
+# corresponding src/**/*.rs files here as that work lands; Blueprint
+# (.blp) files support gettext extraction natively via `_("...")` syntax
+# once the UI strings are marked translatable the same way.
+data/io.github.GITHUB_OWNER.Nexus.desktop.in
+data/io.github.GITHUB_OWNER.Nexus.metainfo.xml.in

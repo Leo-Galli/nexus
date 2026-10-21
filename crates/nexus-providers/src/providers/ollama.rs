@@ -16,8 +16,8 @@ use url::Url;
 
 use nexus_core::http::{build_local_http_client, validate_endpoint_url};
 use nexus_core::{
-    AuthMethod, ChatEvent, ChatMessage, ChatRequest, ChatStream, FinishReason, ModelInfo,
-    Provider, ProviderError, ProviderKind, ProviderResult, ProviderStatus, Role, TokenUsage,
+    AuthMethod, ChatEvent, ChatRequest, ChatStream, FinishReason, ModelInfo, Provider,
+    ProviderError, ProviderKind, ProviderResult, ProviderStatus, Role, TokenUsage,
 };
 
 const DEFAULT_BASE_URL: &str = "http://localhost:11434/";
@@ -317,6 +317,7 @@ fn parse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use nexus_core::ChatMessage;
     use wiremock::matchers::{method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 

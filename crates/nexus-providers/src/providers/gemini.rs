@@ -325,14 +325,12 @@ fn parse_gemini_chunk(json: &str) -> ProviderResult<Vec<ChatEvent>> {
     let chunk: GeminiStreamChunk = serde_json::from_str(json)
         .map_err(|e| ProviderError::InvalidResponse(format!("malformed stream chunk: {e}")))?;
 
+    // Emit in content order: any text first, then usage accounting, then
+    // the terminal `Done` — Gemini typically bundles the final text part,
+    // `finishReason` and `usageMetadata` into one last chunk, and callers
+    // reasonably expect text before bookkeeping events.
     let mut events = Vec::new();
-
-    if let Some(usage) = chunk.usage_metadata {
-        events.push(ChatEvent::Usage(TokenUsage {
-            input_tokens: usage.prompt_token_count,
-            output_tokens: usage.candidates_token_count,
-        }));
-    }
+    let mut finish_reason = None;
 
     for candidate in chunk.candidates {
         if let Some(content) = candidate.content {
@@ -345,10 +343,19 @@ fn parse_gemini_chunk(json: &str) -> ProviderResult<Vec<ChatEvent>> {
             }
         }
         if let Some(reason) = candidate.finish_reason {
-            events.push(ChatEvent::Done {
-                finish_reason: map_finish_reason(&reason),
-            });
+            finish_reason = Some(map_finish_reason(&reason));
         }
+    }
+
+    if let Some(usage) = chunk.usage_metadata {
+        events.push(ChatEvent::Usage(TokenUsage {
+            input_tokens: usage.prompt_token_count,
+            output_tokens: usage.candidates_token_count,
+        }));
+    }
+
+    if let Some(finish_reason) = finish_reason {
+        events.push(ChatEvent::Done { finish_reason });
     }
 
     Ok(events)
