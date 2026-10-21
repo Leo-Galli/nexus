@@ -67,7 +67,10 @@ impl AnthropicProvider {
     /// Test-only: points at a local `wiremock` server; see the identical
     /// note in `openai.rs`.
     #[cfg(test)]
-    fn with_base_url(secrets: Arc<dyn SecretStore>, base_url: impl Into<String>) -> ProviderResult<Self> {
+    fn with_base_url(
+        secrets: Arc<dyn SecretStore>,
+        base_url: impl Into<String>,
+    ) -> ProviderResult<Self> {
         Ok(Self {
             http: build_local_http_client(USER_AGENT)?,
             secrets,
@@ -161,8 +164,9 @@ impl Provider for AnthropicProvider {
         }
 
         let body = resp.text().await.map_err(ProviderError::Network)?;
-        let parsed: AnthropicModelsResponse = serde_json::from_str(&body)
-            .map_err(|e| ProviderError::InvalidResponse(format!("unexpected /models shape: {e}")))?;
+        let parsed: AnthropicModelsResponse = serde_json::from_str(&body).map_err(|e| {
+            ProviderError::InvalidResponse(format!("unexpected /models shape: {e}"))
+        })?;
 
         Ok(parsed
             .data
@@ -185,9 +189,10 @@ impl Provider for AnthropicProvider {
 
         let mut system_parts = Vec::new();
         if let Some(system) = &request.system_prompt
-            && !system.is_empty() {
-                system_parts.push(system.clone());
-            }
+            && !system.is_empty()
+        {
+            system_parts.push(system.clone());
+        }
 
         let mut messages = Vec::new();
         for m in &request.messages {
@@ -274,8 +279,7 @@ fn build_anthropic_sse_stream(resp: reqwest::Response) -> ChatStream {
                         if line.is_empty() {
                             // Blank line: dispatch the accumulated event.
                             if !state.current_data.is_empty() {
-                                let event_name =
-                                    state.current_event.take().unwrap_or_default();
+                                let event_name = state.current_event.take().unwrap_or_default();
                                 let data = std::mem::take(&mut state.current_data);
                                 match parse_anthropic_event(
                                     &event_name,
@@ -362,9 +366,10 @@ fn parse_anthropic_event(
                 ProviderError::InvalidResponse(format!("malformed content_block_delta: {e}"))
             })?;
             if parsed.delta.kind == "text_delta"
-                && let Some(text) = parsed.delta.text {
-                    return Ok(vec![ChatEvent::TextDelta(text)]);
-                }
+                && let Some(text) = parsed.delta.text
+            {
+                return Ok(vec![ChatEvent::TextDelta(text)]);
+            }
             Ok(Vec::new())
         }
         "message_delta" => {

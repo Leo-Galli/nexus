@@ -1,10 +1,10 @@
 //! Conversation CRUD plus a simple title search. See `docs/CONTRACTS.md`
 //! for the frozen function signatures this module implements.
 
-use rusqlite::{params, OptionalExtension};
+use rusqlite::{OptionalExtension, params};
 use uuid::Uuid;
 
-use crate::{models::Conversation, Store, StoreResult};
+use crate::{Store, StoreResult, models::Conversation};
 
 fn row_to_conversation(row: &rusqlite::Row<'_>) -> rusqlite::Result<Conversation> {
     Ok(Conversation {

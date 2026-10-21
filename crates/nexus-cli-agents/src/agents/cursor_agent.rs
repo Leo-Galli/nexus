@@ -37,7 +37,9 @@ use std::path::Path;
 
 use async_trait::async_trait;
 use nexus_core::cli_agent::{OutputFormat, UnsupportedMode};
-use nexus_core::{CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus};
+use nexus_core::{
+    CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus,
+};
 
 const BINARY_NAMES: &[&str] = &["agent", "cursor-agent"];
 const VERSION_ARGS: &[&str] = &["--version"];
@@ -48,9 +50,10 @@ fn parse_version(stdout: &str) -> Option<String> {
         return None;
     }
     if let Ok(re) = regex::Regex::new(r"\d+\.\d+(?:\.\d+)?")
-        && let Some(found) = re.find(trimmed) {
-            return Some(found.as_str().to_string());
-        }
+        && let Some(found) = re.find(trimmed)
+    {
+        return Some(found.as_str().to_string());
+    }
     trimmed.lines().next().map(|s| s.to_string())
 }
 
@@ -180,7 +183,13 @@ mod tests {
         let runner = FakeCommandRunner::new()
             .with_which("agent", "/usr/bin/agent")
             .with_run_result("agent", &["--version"], "cursor-agent 1.2.3\n", "", 0)
-            .with_run_result("agent", &["status"], "Logged in as dev@example.com\n", "", 0);
+            .with_run_result(
+                "agent",
+                &["status"],
+                "Logged in as dev@example.com\n",
+                "",
+                0,
+            );
         let result = CursorAgent::default().detect(&runner).await;
         assert!(result.installed);
         assert_eq!(result.version.as_deref(), Some("1.2.3"));

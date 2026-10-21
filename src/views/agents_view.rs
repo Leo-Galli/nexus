@@ -68,7 +68,10 @@ pub fn build_spawn_argv(
     sandboxed: bool,
 ) -> (String, Vec<String>) {
     if sandboxed {
-        let mut full_args = vec!["--host".to_string(), format!("--directory={}", cwd.display())];
+        let mut full_args = vec![
+            "--host".to_string(),
+            format!("--directory={}", cwd.display()),
+        ];
         full_args.push(program.to_string());
         full_args.extend(args.iter().cloned());
         ("flatpak-spawn".to_string(), full_args)
@@ -169,8 +172,7 @@ impl AgentSessionRow {
         });
         imp.version_badge
             .set_text(detection.version.as_deref().unwrap_or(""));
-        imp.version_badge
-            .set_visible(detection.version.is_some());
+        imp.version_badge.set_visible(detection.version.is_some());
         imp.login_badge.set_text(match detection.login_status {
             LoginStatus::LoggedIn => "Logged in",
             LoginStatus::LoggedOut => "Logged out",
@@ -248,9 +250,11 @@ mod imp {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![Signal::builder("run-once-requested")
-                    .param_types([String::static_type()])
-                    .build()]
+                vec![
+                    Signal::builder("run-once-requested")
+                        .param_types([String::static_type()])
+                        .build(),
+                ]
             })
         }
     }
@@ -320,9 +324,7 @@ impl AgentsView {
     ) -> glib::SignalHandlerId {
         self.connect_local("run-once-requested", false, move |values| {
             let obj = values[0].get::<Self>().expect("run-once-requested arg 0");
-            let agent_id = values[1]
-                .get::<String>()
-                .expect("run-once-requested arg 1");
+            let agent_id = values[1].get::<String>().expect("run-once-requested arg 1");
             f(&obj, &agent_id);
             None
         })
@@ -373,9 +375,7 @@ impl AgentsView {
             "No Agent Session Open",
             "Choose a CLI agent on the left and start a new session.",
         );
-        self.imp()
-            .session_stack
-            .add_named(&empty, Some("empty"));
+        self.imp().session_stack.add_named(&empty, Some("empty"));
         self.imp().session_stack.set_visible_child_name("empty");
     }
 
@@ -468,9 +468,7 @@ impl AgentsView {
                 move |result| {
                     if let Err(err) = result {
                         tracing::warn!("failed to spawn agent session: {err}");
-                        view.show_toast_if_possible(&format!(
-                            "Failed to start session: {err}"
-                        ));
+                        view.show_toast_if_possible(&format!("Failed to start session: {err}"));
                     }
                 }
             ),
@@ -505,8 +503,12 @@ mod tests {
 
     #[test]
     fn build_spawn_argv_wraps_with_flatpak_spawn_when_sandboxed() {
-        let (program, args) =
-            build_spawn_argv("claude", &["--version".to_string()], Path::new("/home/user"), true);
+        let (program, args) = build_spawn_argv(
+            "claude",
+            &["--version".to_string()],
+            Path::new("/home/user"),
+            true,
+        );
         assert_eq!(program, "flatpak-spawn");
         assert_eq!(
             args,

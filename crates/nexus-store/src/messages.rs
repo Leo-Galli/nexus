@@ -3,7 +3,7 @@
 
 use rusqlite::params;
 
-use crate::{models::Message, Store, StoreResult};
+use crate::{Store, StoreResult, models::Message};
 
 fn row_to_message(row: &rusqlite::Row<'_>) -> rusqlite::Result<Message> {
     Ok(Message {
@@ -90,9 +90,13 @@ mod tests {
         let store = Store::open_in_memory().await.unwrap();
         let conversation = conversations::create(&store, "Chat").await.unwrap();
 
-        append(&store, &conversation.id, sample_message(&conversation.id, "hi"))
-            .await
-            .unwrap();
+        append(
+            &store,
+            &conversation.id,
+            sample_message(&conversation.id, "hi"),
+        )
+        .await
+        .unwrap();
         append(
             &store,
             &conversation.id,
@@ -134,9 +138,13 @@ mod tests {
     async fn deleting_conversation_cascades_to_messages() {
         let store = Store::open_in_memory().await.unwrap();
         let conversation = conversations::create(&store, "Chat").await.unwrap();
-        append(&store, &conversation.id, sample_message(&conversation.id, "hi"))
-            .await
-            .unwrap();
+        append(
+            &store,
+            &conversation.id,
+            sample_message(&conversation.id, "hi"),
+        )
+        .await
+        .unwrap();
 
         conversations::delete(&store, &conversation.id)
             .await

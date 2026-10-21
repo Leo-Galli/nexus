@@ -19,8 +19,7 @@ pub mod stats_view;
 /// crate is subclassed. A plain, freshly-built `Adw.StatusPage` is
 /// returned instead, with `icon-name`/`title`/`description` set directly.
 pub fn new_empty_state(icon_name: &str, title: &str, description: &str) -> adw::StatusPage {
-    let builder =
-        gtk::Builder::from_resource("/io/github/GITHUB_OWNER/Nexus/ui/empty-state.ui");
+    let builder = gtk::Builder::from_resource("/io/github/GITHUB_OWNER/Nexus/ui/empty-state.ui");
     let status_page: adw::StatusPage = builder
         .object("empty_state")
         .expect("empty-state.ui must define an object named 'empty_state'");

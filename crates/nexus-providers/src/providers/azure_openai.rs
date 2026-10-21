@@ -33,7 +33,11 @@ use nexus_core::{
     TokenUsage,
 };
 
-const USER_AGENT: &str = concat!("nexus-providers/", env!("CARGO_PKG_VERSION"), " (azure-openai)");
+const USER_AGENT: &str = concat!(
+    "nexus-providers/",
+    env!("CARGO_PKG_VERSION"),
+    " (azure-openai)"
+);
 
 /// Default Azure OpenAI REST API version.
 ///
@@ -251,9 +255,7 @@ async fn map_http_error(resp: reqwest::Response) -> ProviderError {
             let retry_after_secs = None; // Azure's Retry-After header is not read here; see note below.
             ProviderError::RateLimited { retry_after_secs }
         }
-        _ => ProviderError::InvalidResponse(format!(
-            "Azure OpenAI returned HTTP {status}: {text}"
-        )),
+        _ => ProviderError::InvalidResponse(format!("Azure OpenAI returned HTTP {status}: {text}")),
     }
 }
 
@@ -319,54 +321,59 @@ fn sse_chat_stream(resp: reqwest::Response) -> ChatStream {
         done_emitted: false,
     };
 
-    Box::pin(futures_util::stream::unfold(state, |mut state| async move {
-        loop {
-            if let Some(ev) = state.pending.pop_front() {
-                return Some((ev, state));
-            }
-            if state.chunks_done {
-                if state.done_emitted {
-                    return None;
+    Box::pin(futures_util::stream::unfold(
+        state,
+        |mut state| async move {
+            loop {
+                if let Some(ev) = state.pending.pop_front() {
+                    return Some((ev, state));
                 }
-                state.done_emitted = true;
-                return Some((
-                    Ok(ChatEvent::Done {
-                        finish_reason: FinishReason::Unknown,
-                    }),
-                    state,
-                ));
-            }
-            match state.chunks.next().await {
-                Some(Ok(bytes)) => {
-                    state.buffer.extend_from_slice(&bytes);
-                    while let Some(pos) = state.buffer.iter().position(|&b| b == b'\n') {
-                        let mut line: Vec<u8> = state.buffer.drain(..=pos).collect();
-                        line.pop(); // drop trailing '\n'
-                        if let Some(events) = parse_sse_line(&line) {
-                            for ev in events {
-                                if matches!(ev, Ok(ChatEvent::Done { .. })) {
-                                    state.done_emitted = true;
+                if state.chunks_done {
+                    if state.done_emitted {
+                        return None;
+                    }
+                    state.done_emitted = true;
+                    return Some((
+                        Ok(ChatEvent::Done {
+                            finish_reason: FinishReason::Unknown,
+                        }),
+                        state,
+                    ));
+                }
+                match state.chunks.next().await {
+                    Some(Ok(bytes)) => {
+                        state.buffer.extend_from_slice(&bytes);
+                        while let Some(pos) = state.buffer.iter().position(|&b| b == b'\n') {
+                            let mut line: Vec<u8> = state.buffer.drain(..=pos).collect();
+                            line.pop(); // drop trailing '\n'
+                            if let Some(events) = parse_sse_line(&line) {
+                                for ev in events {
+                                    if matches!(ev, Ok(ChatEvent::Done { .. })) {
+                                        state.done_emitted = true;
+                                    }
+                                    state.pending.push_back(ev);
                                 }
-                                state.pending.push_back(ev);
                             }
                         }
                     }
-                }
-                Some(Err(e)) => {
-                    state.pending.push_back(Err(ProviderError::Network(e)));
-                    state.chunks_done = true;
-                    state.done_emitted = true;
-                }
-                None => {
-                    state.chunks_done = true;
+                    Some(Err(e)) => {
+                        state.pending.push_back(Err(ProviderError::Network(e)));
+                        state.chunks_done = true;
+                        state.done_emitted = true;
+                    }
+                    None => {
+                        state.chunks_done = true;
+                    }
                 }
             }
-        }
-    }))
+        },
+    ))
 }
 
 fn parse_sse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
-    let text = std::str::from_utf8(line).unwrap_or("").trim_end_matches('\r');
+    let text = std::str::from_utf8(line)
+        .unwrap_or("")
+        .trim_end_matches('\r');
     let payload = text.strip_prefix("data:")?.trim();
     if payload.is_empty() {
         return None;
@@ -387,9 +394,10 @@ fn parse_sse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
             }
             for choice in &chunk.choices {
                 if let Some(content) = &choice.delta.content
-                    && !content.is_empty() {
-                        events.push(Ok(ChatEvent::TextDelta(content.clone())));
-                    }
+                    && !content.is_empty()
+                {
+                    events.push(Ok(ChatEvent::TextDelta(content.clone())));
+                }
                 if let Some(reason) = &choice.finish_reason {
                     events.push(Ok(ChatEvent::Done {
                         finish_reason: map_finish_reason(Some(reason.as_str())),
@@ -407,8 +415,8 @@ fn parse_sse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nexus_core::secrets::SecretError;
     use nexus_core::ChatMessage;
+    use nexus_core::secrets::SecretError;
     use wiremock::matchers::{header, method, path, query_param};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -450,7 +458,10 @@ mod tests {
     #[tokio::test]
     async fn list_models_reports_the_configured_deployment() {
         let provider = provider_for("http://127.0.0.1:1", Some("test-key"));
-        let models = provider.list_models().await.expect("list_models should succeed");
+        let models = provider
+            .list_models()
+            .await
+            .expect("list_models should succeed");
         assert_eq!(models.len(), 1);
         assert_eq!(models[0].id, "my-gpt4-deployment");
     }
@@ -479,7 +490,10 @@ mod tests {
             tools: Vec::new(),
             stream: true,
         };
-        let mut stream = provider.send_chat(request).await.expect("send_chat should succeed");
+        let mut stream = provider
+            .send_chat(request)
+            .await
+            .expect("send_chat should succeed");
 
         let mut text = String::new();
         while let Some(event) = stream.next().await {
@@ -510,7 +524,9 @@ mod tests {
     async fn non_2xx_is_mapped_to_provider_error_not_panic() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/openai/deployments/my-gpt4-deployment/chat/completions"))
+            .and(path(
+                "/openai/deployments/my-gpt4-deployment/chat/completions",
+            ))
             .respond_with(ResponseTemplate::new(404).set_body_string("deployment not found"))
             .mount(&server)
             .await;

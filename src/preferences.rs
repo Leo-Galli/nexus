@@ -139,12 +139,14 @@ impl ProviderRow {
                 imp.key_entry_row.set_visible(true);
                 imp.key_actions_row.set_visible(true);
                 imp.oauth_actions_row.set_visible(false);
-                imp.open_key_page_button.set_visible(summary.api_key_url.is_some());
+                imp.open_key_page_button
+                    .set_visible(summary.api_key_url.is_some());
                 imp.disconnect_button.set_visible(summary.status.configured);
                 if summary.status.configured {
                     imp.key_entry_row.set_text("");
-                    imp.key_entry_row
-                        .set_tooltip_text(Some("A key is already stored; enter a new one to replace it."));
+                    imp.key_entry_row.set_tooltip_text(Some(
+                        "A key is already stored; enter a new one to replace it.",
+                    ));
                 }
             }
             AuthMethod::OAuth => {
@@ -316,13 +318,14 @@ impl NexusPreferences {
             row,
             move |_| {
                 if let Some(summary) = row.summary()
-                    && let Some(url) = summary.api_key_url {
-                        gtk::UriLauncher::new(url).launch(
-                            None::<&gtk::Window>,
-                            gio::Cancellable::NONE,
-                            |_| {},
-                        );
-                    }
+                    && let Some(url) = summary.api_key_url
+                {
+                    gtk::UriLauncher::new(url).launch(
+                        None::<&gtk::Window>,
+                        gio::Cancellable::NONE,
+                        |_| {},
+                    );
+                }
             }
         ));
         row_imp.launch_login_button.connect_clicked(glib::clone!(
@@ -488,16 +491,18 @@ impl NexusPreferences {
     fn setup_signals(&self) {
         let imp = self.imp();
 
-        imp.default_temperature_row.connect_value_notify(glib::clone!(
-            #[weak(rename_to = prefs)]
-            self,
-            move |row| prefs.persist_setting("default_temperature", row.value().to_string())
-        ));
-        imp.default_max_tokens_row.connect_value_notify(glib::clone!(
-            #[weak(rename_to = prefs)]
-            self,
-            move |row| prefs.persist_setting("default_max_tokens", row.value().to_string())
-        ));
+        imp.default_temperature_row
+            .connect_value_notify(glib::clone!(
+                #[weak(rename_to = prefs)]
+                self,
+                move |row| prefs.persist_setting("default_temperature", row.value().to_string())
+            ));
+        imp.default_max_tokens_row
+            .connect_value_notify(glib::clone!(
+                #[weak(rename_to = prefs)]
+                self,
+                move |row| prefs.persist_setting("default_max_tokens", row.value().to_string())
+            ));
         imp.default_system_prompt_row.connect_changed(glib::clone!(
             #[weak(rename_to = prefs)]
             self,

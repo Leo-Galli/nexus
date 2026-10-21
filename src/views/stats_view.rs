@@ -48,7 +48,10 @@ pub enum DatePreset {
 /// `(since, until)` filter bounds for a preset, anchored at `now`.
 /// `until` is always `None` (meaning "through now") since every preset
 /// means "from N days ago through now", never a closed historical range.
-pub fn date_preset_range(preset: DatePreset, now: DateTime<Utc>) -> (Option<DateTime<Utc>>, Option<DateTime<Utc>>) {
+pub fn date_preset_range(
+    preset: DatePreset,
+    now: DateTime<Utc>,
+) -> (Option<DateTime<Utc>>, Option<DateTime<Utc>>) {
     match preset {
         DatePreset::Last7Days => (Some(now - Duration::days(7)), None),
         DatePreset::Last30Days => (Some(now - Duration::days(30)), None),
@@ -117,7 +120,11 @@ pub fn summarize(rows: &[AggregatedRow]) -> StatsSummary {
         total_requests,
         total_input_tokens,
         total_output_tokens,
-        total_cost_usd: if any_cost_known { Some(total_cost_usd) } else { None },
+        total_cost_usd: if any_cost_known {
+            Some(total_cost_usd)
+        } else {
+            None
+        },
         any_cost_unknown,
         avg_latency_ms,
         total_errors,
@@ -391,24 +398,21 @@ impl StatsView {
             .initial_name("nexus-usage.csv")
             .build();
         let root = self.root().and_then(|r| r.downcast::<gtk::Window>().ok());
-        dialog.save(
-            root.as_ref(),
-            gio::Cancellable::NONE,
-            move |result| {
-                let Ok(file) = result else { return };
-                let csv = match nexus_stats::csv_export::rows_to_csv(&rows) {
-                    Ok(csv) => csv,
-                    Err(err) => {
-                        tracing::error!("failed to render CSV: {err}");
-                        return;
-                    }
-                };
-                if let Some(path) = file.path()
-                    && let Err(err) = std::fs::write(&path, csv) {
-                        tracing::error!("failed to write {}: {err}", path.display());
-                    }
-            },
-        );
+        dialog.save(root.as_ref(), gio::Cancellable::NONE, move |result| {
+            let Ok(file) = result else { return };
+            let csv = match nexus_stats::csv_export::rows_to_csv(&rows) {
+                Ok(csv) => csv,
+                Err(err) => {
+                    tracing::error!("failed to render CSV: {err}");
+                    return;
+                }
+            };
+            if let Some(path) = file.path()
+                && let Err(err) = std::fs::write(&path, csv)
+            {
+                tracing::error!("failed to write {}: {err}", path.display());
+            }
+        });
     }
 
     fn setup_cards(&self) {
@@ -555,7 +559,13 @@ mod tests {
     use super::*;
     use chrono::TimeZone;
 
-    fn sample_row(bucket: &str, cost: Option<f64>, requests: u32, latency: f64, errors: u32) -> AggregatedRow {
+    fn sample_row(
+        bucket: &str,
+        cost: Option<f64>,
+        requests: u32,
+        latency: f64,
+        errors: u32,
+    ) -> AggregatedRow {
         AggregatedRow {
             bucket: bucket.to_string(),
             provider_id: "openai".to_string(),
@@ -623,10 +633,13 @@ mod tests {
             sample_row("2026-01-01", Some(1.0), 10, 100.0, 0),
         ];
         let totals = bucket_totals(&rows);
-        assert_eq!(totals, vec![
-            ("2026-01-01".to_string(), 300),
-            ("2026-01-02".to_string(), 150),
-        ]);
+        assert_eq!(
+            totals,
+            vec![
+                ("2026-01-01".to_string(), 300),
+                ("2026-01-02".to_string(), 150),
+            ]
+        );
     }
 
     #[test]

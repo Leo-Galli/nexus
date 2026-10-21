@@ -191,9 +191,10 @@ impl SecretStore for KeyringSecretStore {
                 .map_err(|err| SecretError::Backend(err.to_string()))?;
 
             if let Some(provider) = item_attrs.get(PROVIDER_ATTRIBUTE)
-                && !providers.contains(provider) {
-                    providers.push(provider.clone());
-                }
+                && !providers.contains(provider)
+            {
+                providers.push(provider.clone());
+            }
         }
 
         Ok(providers)
@@ -250,7 +251,10 @@ mod tests {
     #[test]
     fn label_is_human_readable_and_identifies_provider_and_account() {
         let key = SecretKey::new("anthropic", "default");
-        assert_eq!(KeyringSecretStore::label(&key), "Nexus — anthropic (default)");
+        assert_eq!(
+            KeyringSecretStore::label(&key),
+            "Nexus — anthropic (default)"
+        );
     }
 
     /// Tests that exercise the real `oo7` <-> Secret Service / portal

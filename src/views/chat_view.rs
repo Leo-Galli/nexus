@@ -412,7 +412,11 @@ impl ChatView {
     /// Adds a new active model: a removable chip plus its own scrollable
     /// message column. No-op (returns the existing id) if this
     /// (provider_binding, model.id) pair is already active.
-    pub fn add_active_model(&self, provider_binding: ProviderBindingId, model: ModelInfo) -> String {
+    pub fn add_active_model(
+        &self,
+        provider_binding: ProviderBindingId,
+        model: ModelInfo,
+    ) -> String {
         let id = column_id(&provider_binding, &model.id);
         let imp = self.imp();
         if imp.columns.borrow().contains_key(&id) {
@@ -518,11 +522,7 @@ impl ChatView {
 
     fn update_stop_sensitivity(&self) {
         let imp = self.imp();
-        let any_streaming = imp
-            .columns
-            .borrow()
-            .values()
-            .any(|c| *c.streaming.borrow());
+        let any_streaming = imp.columns.borrow().values().any(|c| *c.streaming.borrow());
         imp.stop_button.set_sensitive(any_streaming);
     }
 
@@ -591,8 +591,7 @@ impl ChatView {
             #[upgrade_or]
             glib::Propagation::Proceed,
             move |_, keyval, _, state| {
-                let is_enter =
-                    keyval == gtk::gdk::Key::Return || keyval == gtk::gdk::Key::KP_Enter;
+                let is_enter = keyval == gtk::gdk::Key::Return || keyval == gtk::gdk::Key::KP_Enter;
                 if is_enter && !state.contains(gtk::gdk::ModifierType::SHIFT_MASK) {
                     view.activate_send();
                     glib::Propagation::Stop
@@ -643,6 +642,9 @@ mod tests {
 
     #[test]
     fn column_id_combines_binding_and_model() {
-        assert_eq!(column_id("openai-default", "gpt-5"), "openai-default::gpt-5");
+        assert_eq!(
+            column_id("openai-default", "gpt-5"),
+            "openai-default::gpt-5"
+        );
     }
 }

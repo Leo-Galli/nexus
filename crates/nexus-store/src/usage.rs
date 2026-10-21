@@ -3,10 +3,10 @@
 //! implements.
 
 use chrono::{DateTime, Utc};
-use rusqlite::types::ToSql;
 use rusqlite::params;
+use rusqlite::types::ToSql;
 
-use crate::{models::UsageEvent, Store, StoreResult};
+use crate::{Store, StoreResult, models::UsageEvent};
 
 #[derive(Debug, Clone, Default)]
 pub struct UsageFilter {
@@ -115,7 +115,12 @@ mod tests {
     use chrono::{Duration, Utc};
     use uuid::Uuid;
 
-    fn sample_event(provider_id: &str, model_id: &str, kind: &str, occurred_at: DateTime<Utc>) -> UsageEvent {
+    fn sample_event(
+        provider_id: &str,
+        model_id: &str,
+        kind: &str,
+        occurred_at: DateTime<Utc>,
+    ) -> UsageEvent {
         UsageEvent {
             id: Uuid::new_v4().to_string(),
             occurred_at,
@@ -132,12 +137,20 @@ mod tests {
 
     async fn seed(store: &Store) -> DateTime<Utc> {
         let now = Utc::now();
-        record(store, sample_event("openai", "gpt-5", "chat", now - Duration::hours(2)))
-            .await
-            .unwrap();
         record(
             store,
-            sample_event("anthropic", "claude-sonnet-5", "cli", now - Duration::hours(1)),
+            sample_event("openai", "gpt-5", "chat", now - Duration::hours(2)),
+        )
+        .await
+        .unwrap();
+        record(
+            store,
+            sample_event(
+                "anthropic",
+                "claude-sonnet-5",
+                "cli",
+                now - Duration::hours(1),
+            ),
         )
         .await
         .unwrap();

@@ -60,19 +60,20 @@ fn find_resources_file() -> Option<PathBuf> {
     }
 
     if let Ok(exe) = std::env::current_exe()
-        && let Some(dir) = exe.parent() {
-            let next_to_exe = dir.join("nexus.gresource");
-            if next_to_exe.exists() {
-                return Some(next_to_exe);
-            }
-            // Also check the Meson build layout (`_build/src/nexus-resources`
-            // style outputs land in the same directory as the build script
-            // output in some configurations); best-effort only.
-            let build_layout = dir.join("nexus-resources.gresource");
-            if build_layout.exists() {
-                return Some(build_layout);
-            }
+        && let Some(dir) = exe.parent()
+    {
+        let next_to_exe = dir.join("nexus.gresource");
+        if next_to_exe.exists() {
+            return Some(next_to_exe);
         }
+        // Also check the Meson build layout (`_build/src/nexus-resources`
+        // style outputs land in the same directory as the build script
+        // output in some configurations); best-effort only.
+        let build_layout = dir.join("nexus-resources.gresource");
+        if build_layout.exists() {
+            return Some(build_layout);
+        }
+    }
 
     None
 }

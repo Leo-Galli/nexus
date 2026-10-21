@@ -8,7 +8,11 @@ pub enum Trigger {
     /// own 6-field `sec min hour day-of-month month day-of-week` syntax
     /// (not classic 5-field Unix cron) — the UI layer must show the user
     /// an example in that exact format.
-    Scheduled { cron_expression: String },
+    Scheduled {
+        cron_expression: String,
+    },
     /// Fires when any file under `path` is created, modified, or removed.
-    FolderChanged { path: String },
+    FolderChanged {
+        path: String,
+    },
 }

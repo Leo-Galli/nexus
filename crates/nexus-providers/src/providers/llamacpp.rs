@@ -26,7 +26,11 @@ use nexus_core::{
 };
 
 const DEFAULT_BASE_URL: &str = "http://localhost:8080/";
-const USER_AGENT: &str = concat!("nexus-providers/", env!("CARGO_PKG_VERSION"), " (llama-cpp)");
+const USER_AGENT: &str = concat!(
+    "nexus-providers/",
+    env!("CARGO_PKG_VERSION"),
+    " (llama-cpp)"
+);
 
 /// Guidance appended to parsing errors, since the most common cause is a
 /// `llama.cpp server` build/flag combination that doesn't speak the
@@ -261,54 +265,59 @@ fn sse_chat_stream(resp: reqwest::Response) -> ChatStream {
         done_emitted: false,
     };
 
-    Box::pin(futures_util::stream::unfold(state, |mut state| async move {
-        loop {
-            if let Some(ev) = state.pending.pop_front() {
-                return Some((ev, state));
-            }
-            if state.chunks_done {
-                if state.done_emitted {
-                    return None;
+    Box::pin(futures_util::stream::unfold(
+        state,
+        |mut state| async move {
+            loop {
+                if let Some(ev) = state.pending.pop_front() {
+                    return Some((ev, state));
                 }
-                state.done_emitted = true;
-                return Some((
-                    Ok(ChatEvent::Done {
-                        finish_reason: FinishReason::Unknown,
-                    }),
-                    state,
-                ));
-            }
-            match state.chunks.next().await {
-                Some(Ok(bytes)) => {
-                    state.buffer.extend_from_slice(&bytes);
-                    while let Some(pos) = state.buffer.iter().position(|&b| b == b'\n') {
-                        let mut line: Vec<u8> = state.buffer.drain(..=pos).collect();
-                        line.pop(); // drop trailing '\n'
-                        if let Some(events) = parse_sse_line(&line) {
-                            for ev in events {
-                                if matches!(ev, Ok(ChatEvent::Done { .. })) {
-                                    state.done_emitted = true;
+                if state.chunks_done {
+                    if state.done_emitted {
+                        return None;
+                    }
+                    state.done_emitted = true;
+                    return Some((
+                        Ok(ChatEvent::Done {
+                            finish_reason: FinishReason::Unknown,
+                        }),
+                        state,
+                    ));
+                }
+                match state.chunks.next().await {
+                    Some(Ok(bytes)) => {
+                        state.buffer.extend_from_slice(&bytes);
+                        while let Some(pos) = state.buffer.iter().position(|&b| b == b'\n') {
+                            let mut line: Vec<u8> = state.buffer.drain(..=pos).collect();
+                            line.pop(); // drop trailing '\n'
+                            if let Some(events) = parse_sse_line(&line) {
+                                for ev in events {
+                                    if matches!(ev, Ok(ChatEvent::Done { .. })) {
+                                        state.done_emitted = true;
+                                    }
+                                    state.pending.push_back(ev);
                                 }
-                                state.pending.push_back(ev);
                             }
                         }
                     }
-                }
-                Some(Err(e)) => {
-                    state.pending.push_back(Err(ProviderError::Network(e)));
-                    state.chunks_done = true;
-                    state.done_emitted = true;
-                }
-                None => {
-                    state.chunks_done = true;
+                    Some(Err(e)) => {
+                        state.pending.push_back(Err(ProviderError::Network(e)));
+                        state.chunks_done = true;
+                        state.done_emitted = true;
+                    }
+                    None => {
+                        state.chunks_done = true;
+                    }
                 }
             }
-        }
-    }))
+        },
+    ))
 }
 
 fn parse_sse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
-    let text = std::str::from_utf8(line).unwrap_or("").trim_end_matches('\r');
+    let text = std::str::from_utf8(line)
+        .unwrap_or("")
+        .trim_end_matches('\r');
     let payload = text.strip_prefix("data:")?.trim();
     if payload.is_empty() {
         return None;
@@ -329,9 +338,10 @@ fn parse_sse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
             }
             for choice in &chunk.choices {
                 if let Some(content) = &choice.delta.content
-                    && !content.is_empty() {
-                        events.push(Ok(ChatEvent::TextDelta(content.clone())));
-                    }
+                    && !content.is_empty()
+                {
+                    events.push(Ok(ChatEvent::TextDelta(content.clone())));
+                }
                 if let Some(reason) = &choice.finish_reason {
                     events.push(Ok(ChatEvent::Done {
                         finish_reason: map_finish_reason(Some(reason.as_str())),
@@ -373,7 +383,10 @@ mod tests {
             .await;
 
         let provider = provider_for(&server.uri());
-        let models = provider.list_models().await.expect("list_models should succeed");
+        let models = provider
+            .list_models()
+            .await
+            .expect("list_models should succeed");
         assert_eq!(models.len(), 1);
         assert_eq!(models[0].id, "qwen2.5-7b-instruct-q4_k_m.gguf");
     }
@@ -403,7 +416,10 @@ mod tests {
             tools: Vec::new(),
             stream: true,
         };
-        let mut stream = provider.send_chat(request).await.expect("send_chat should succeed");
+        let mut stream = provider
+            .send_chat(request)
+            .await
+            .expect("send_chat should succeed");
 
         let mut text = String::new();
         let mut saw_usage = false;
@@ -447,7 +463,10 @@ mod tests {
             tools: Vec::new(),
             stream: true,
         };
-        let mut stream = provider.send_chat(request).await.expect("send_chat should succeed");
+        let mut stream = provider
+            .send_chat(request)
+            .await
+            .expect("send_chat should succeed");
         let first = stream.next().await.expect("stream should yield one item");
         assert!(matches!(first, Err(ProviderError::InvalidResponse(_))));
     }
@@ -478,7 +497,10 @@ mod tests {
     #[tokio::test]
     async fn status_reports_unreachable_on_connection_refused_without_erroring() {
         let provider = provider_for("http://127.0.0.1:0");
-        let status = provider.status().await.expect("status() must not error on connection refused");
+        let status = provider
+            .status()
+            .await
+            .expect("status() must not error on connection refused");
         assert!(status.configured);
         assert_eq!(status.reachable, Some(false));
     }

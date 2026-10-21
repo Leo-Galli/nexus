@@ -40,8 +40,8 @@ pub fn build_local_http_client(user_agent: &str) -> Result<reqwest::Client, Prov
 /// - no embedded credentials (`user:pass@host`) — those belong in the
 ///   secret store, never in a URL string that may end up in logs.
 pub fn validate_endpoint_url(raw: &str) -> Result<Url, ProviderError> {
-    let url = Url::parse(raw)
-        .map_err(|e| ProviderError::InvalidConfig(format!("invalid URL: {e}")))?;
+    let url =
+        Url::parse(raw).map_err(|e| ProviderError::InvalidConfig(format!("invalid URL: {e}")))?;
 
     if !url.username().is_empty() || url.password().is_some() {
         return Err(ProviderError::InvalidConfig(

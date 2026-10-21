@@ -19,8 +19,8 @@ pub use cli_agent::{
 };
 pub use error::{ProviderError, ProviderResult};
 pub use model::{
-    ChatEvent, ChatMessage, ChatRequest, FinishReason, ModelInfo, Role, ToolCall,
-    ToolDefinition, TokenUsage,
+    ChatEvent, ChatMessage, ChatRequest, FinishReason, ModelInfo, Role, TokenUsage, ToolCall,
+    ToolDefinition,
 };
 pub use provider::{AuthMethod, ChatStream, Provider, ProviderKind, ProviderStatus};
 pub use secrets::{SecretKey, SecretStore};

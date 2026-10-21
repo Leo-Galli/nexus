@@ -6,5 +6,5 @@ pub mod aggregate;
 pub mod csv_export;
 pub mod pricing;
 
-pub use aggregate::{aggregate, AggregatedRow, BucketGranularity};
+pub use aggregate::{AggregatedRow, BucketGranularity, aggregate};
 pub use pricing::{ModelPrice, PricingError, PricingTable};

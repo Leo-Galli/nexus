@@ -227,61 +227,64 @@ fn ndjson_chat_stream(resp: reqwest::Response) -> ChatStream {
         done_emitted: false,
     };
 
-    Box::pin(futures_util::stream::unfold(state, |mut state| async move {
-        loop {
-            if let Some(ev) = state.pending.pop_front() {
-                return Some((ev, state));
-            }
-            if state.chunks_done {
-                if state.done_emitted {
-                    return None;
+    Box::pin(futures_util::stream::unfold(
+        state,
+        |mut state| async move {
+            loop {
+                if let Some(ev) = state.pending.pop_front() {
+                    return Some((ev, state));
                 }
-                state.done_emitted = true;
-                return Some((
-                    Ok(ChatEvent::Done {
-                        finish_reason: FinishReason::Unknown,
-                    }),
-                    state,
-                ));
-            }
-            match state.chunks.next().await {
-                Some(Ok(bytes)) => {
-                    state.buffer.extend_from_slice(&bytes);
-                    while let Some(pos) = state.buffer.iter().position(|&b| b == b'\n') {
-                        let mut line: Vec<u8> = state.buffer.drain(..=pos).collect();
-                        line.pop(); // drop trailing '\n'
-                        if let Some(events) = parse_line(&line) {
-                            for ev in events {
-                                if matches!(ev, Ok(ChatEvent::Done { .. })) {
-                                    state.done_emitted = true;
+                if state.chunks_done {
+                    if state.done_emitted {
+                        return None;
+                    }
+                    state.done_emitted = true;
+                    return Some((
+                        Ok(ChatEvent::Done {
+                            finish_reason: FinishReason::Unknown,
+                        }),
+                        state,
+                    ));
+                }
+                match state.chunks.next().await {
+                    Some(Ok(bytes)) => {
+                        state.buffer.extend_from_slice(&bytes);
+                        while let Some(pos) = state.buffer.iter().position(|&b| b == b'\n') {
+                            let mut line: Vec<u8> = state.buffer.drain(..=pos).collect();
+                            line.pop(); // drop trailing '\n'
+                            if let Some(events) = parse_line(&line) {
+                                for ev in events {
+                                    if matches!(ev, Ok(ChatEvent::Done { .. })) {
+                                        state.done_emitted = true;
+                                    }
+                                    state.pending.push_back(ev);
                                 }
-                                state.pending.push_back(ev);
                             }
                         }
                     }
-                }
-                Some(Err(e)) => {
-                    state.pending.push_back(Err(ProviderError::Network(e)));
-                    state.chunks_done = true;
-                    state.done_emitted = true; // network error already terminates the stream
-                }
-                None => {
-                    if !state.buffer.is_empty() {
-                        let line = std::mem::take(&mut state.buffer);
-                        if let Some(events) = parse_line(&line) {
-                            for ev in events {
-                                if matches!(ev, Ok(ChatEvent::Done { .. })) {
-                                    state.done_emitted = true;
+                    Some(Err(e)) => {
+                        state.pending.push_back(Err(ProviderError::Network(e)));
+                        state.chunks_done = true;
+                        state.done_emitted = true; // network error already terminates the stream
+                    }
+                    None => {
+                        if !state.buffer.is_empty() {
+                            let line = std::mem::take(&mut state.buffer);
+                            if let Some(events) = parse_line(&line) {
+                                for ev in events {
+                                    if matches!(ev, Ok(ChatEvent::Done { .. })) {
+                                        state.done_emitted = true;
+                                    }
+                                    state.pending.push_back(ev);
                                 }
-                                state.pending.push_back(ev);
                             }
                         }
+                        state.chunks_done = true;
                     }
-                    state.chunks_done = true;
                 }
             }
-        }
-    }))
+        },
+    ))
 }
 
 fn parse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
@@ -293,9 +296,10 @@ fn parse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
         Ok(line) => {
             let mut events = Vec::new();
             if let Some(message) = &line.message
-                && !message.content.is_empty() {
-                    events.push(Ok(ChatEvent::TextDelta(message.content.clone())));
-                }
+                && !message.content.is_empty()
+            {
+                events.push(Ok(ChatEvent::TextDelta(message.content.clone())));
+            }
             if line.done {
                 events.push(Ok(ChatEvent::Usage(TokenUsage {
                     input_tokens: line.prompt_eval_count.unwrap_or(0),
@@ -336,7 +340,10 @@ mod tests {
             .await;
 
         let provider = provider_for(&server.uri());
-        let models = provider.list_models().await.expect("list_models should succeed");
+        let models = provider
+            .list_models()
+            .await
+            .expect("list_models should succeed");
         assert_eq!(models.len(), 2);
         assert_eq!(models[0].id, "llama3:8b");
     }
@@ -351,10 +358,7 @@ mod tests {
         );
         Mock::given(method("POST"))
             .and(path("/api/chat"))
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .set_body_raw(body, "application/x-ndjson"),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_raw(body, "application/x-ndjson"))
             .mount(&server)
             .await;
 
@@ -368,7 +372,10 @@ mod tests {
             tools: Vec::new(),
             stream: true,
         };
-        let mut stream = provider.send_chat(request).await.expect("send_chat should succeed");
+        let mut stream = provider
+            .send_chat(request)
+            .await
+            .expect("send_chat should succeed");
 
         let mut text = String::new();
         let mut saw_usage = false;
@@ -422,7 +429,10 @@ mod tests {
         // "local server simply not running" path without flakiness tied to
         // some specific unused port on the test machine.
         let provider = provider_for("http://127.0.0.1:0");
-        let status = provider.status().await.expect("status() must not error on connection refused");
+        let status = provider
+            .status()
+            .await
+            .expect("status() must not error on connection refused");
         assert!(status.configured);
         assert_eq!(status.reachable, Some(false));
     }

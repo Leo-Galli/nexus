@@ -1,11 +1,11 @@
 //! Automation definitions and their run history. See `docs/CONTRACTS.md`
 //! for the frozen function signatures this module implements.
 
-use rusqlite::{params, OptionalExtension};
+use rusqlite::{OptionalExtension, params};
 
 use crate::{
-    models::{Automation, AutomationRun},
     Store, StoreResult,
+    models::{Automation, AutomationRun},
 };
 
 fn row_to_automation(row: &rusqlite::Row<'_>) -> rusqlite::Result<Automation> {

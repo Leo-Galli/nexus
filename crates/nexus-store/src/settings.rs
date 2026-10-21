@@ -1,7 +1,7 @@
 //! Simple key-value application settings. See `docs/CONTRACTS.md` for the
 //! frozen function signatures this module implements.
 
-use rusqlite::{params, OptionalExtension};
+use rusqlite::{OptionalExtension, params};
 
 use crate::{Store, StoreResult};
 
@@ -50,7 +50,10 @@ mod tests {
     async fn set_then_get_round_trips() {
         let store = Store::open_in_memory().await.unwrap();
         set(&store, "theme", "dark").await.unwrap();
-        assert_eq!(get(&store, "theme").await.unwrap(), Some("dark".to_string()));
+        assert_eq!(
+            get(&store, "theme").await.unwrap(),
+            Some("dark".to_string())
+        );
     }
 
     #[tokio::test]
@@ -58,6 +61,9 @@ mod tests {
         let store = Store::open_in_memory().await.unwrap();
         set(&store, "theme", "dark").await.unwrap();
         set(&store, "theme", "light").await.unwrap();
-        assert_eq!(get(&store, "theme").await.unwrap(), Some("light".to_string()));
+        assert_eq!(
+            get(&store, "theme").await.unwrap(),
+            Some("light".to_string())
+        );
     }
 }

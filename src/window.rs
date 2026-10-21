@@ -129,7 +129,9 @@ impl NexusWindow {
 
         let chat_view = ChatView::new();
         imp.content_stack.add_named(&chat_view, Some("chat"));
-        imp.chat_view.set(chat_view).expect("views are only created once");
+        imp.chat_view
+            .set(chat_view)
+            .expect("views are only created once");
 
         let agents_view = AgentsView::new();
         imp.content_stack.add_named(&agents_view, Some("agents"));

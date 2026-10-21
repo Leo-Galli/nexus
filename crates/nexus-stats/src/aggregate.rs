@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use chrono::{DateTime, Datelike, Utc};
-use nexus_store::{usage, Store, StoreResult};
+use nexus_store::{Store, StoreResult, usage};
 use serde::Serialize;
 
 use crate::pricing::PricingTable;

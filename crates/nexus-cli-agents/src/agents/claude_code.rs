@@ -35,7 +35,9 @@ use std::path::Path;
 
 use async_trait::async_trait;
 use nexus_core::cli_agent::{OutputFormat, UnsupportedMode};
-use nexus_core::{CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus};
+use nexus_core::{
+    CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus,
+};
 
 const BINARY_NAMES: &[&str] = &["claude"];
 // No version flag confirmed against official docs - intentionally empty.

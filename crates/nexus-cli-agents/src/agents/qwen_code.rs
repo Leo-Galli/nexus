@@ -32,7 +32,9 @@ use std::path::Path;
 
 use async_trait::async_trait;
 use nexus_core::cli_agent::{OutputFormat, UnsupportedMode};
-use nexus_core::{CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus};
+use nexus_core::{
+    CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus,
+};
 
 const BINARY_NAMES: &[&str] = &["qwen"];
 const VERSION_ARGS: &[&str] = &["--version"];
@@ -46,9 +48,10 @@ fn parse_version(stdout: &str) -> Option<String> {
         return None;
     }
     if let Ok(re) = regex::Regex::new(r"\d+\.\d+(?:\.\d+)?")
-        && let Some(found) = re.find(trimmed) {
-            return Some(found.as_str().to_string());
-        }
+        && let Some(found) = re.find(trimmed)
+    {
+        return Some(found.as_str().to_string());
+    }
     trimmed.lines().next().map(|s| s.to_string())
 }
 

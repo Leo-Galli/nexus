@@ -121,7 +121,10 @@ mod tests {
 
         assert_eq!(results.len(), 1);
         assert!(results[0].reachable);
-        assert_eq!(results[0].base_url, Url::parse(&server.uri()).unwrap().join("/").unwrap());
+        assert_eq!(
+            results[0].base_url,
+            Url::parse(&server.uri()).unwrap().join("/").unwrap()
+        );
     }
 
     #[tokio::test]

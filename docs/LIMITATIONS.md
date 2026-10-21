@@ -11,26 +11,50 @@ that comment is the source of truth; this file indexes them.
 - **Rust toolchain / edition**: the workspace targets edition 2024 /
   Rust >= 1.92 because `gio`/`glib` 0.22.x (the versions compatible with
   the current `libadwaita` 0.9.x / `gtk4` 0.11.x / `vte4` 0.10.x set,
-  verified against crates.io on 2026-10-21) declare that MSRV. Full
-  end-to-end `cargo build` of the GTK binary has **not** been run in the
-  environment this codebase was generated in (no network access to
-  crates.io from the build sandbox); run it as the very first step after
-  cloning and fix anything edition-2024-specific that surfaces.
+  verified against crates.io on 2026-10-21) declare that MSRV.
+  **Verified**: `cargo check --bin nexus` and `cargo test --workspace`
+  both succeed end-to-end (rustc/cargo 1.98.1) — the full workspace
+  (every crate plus the GTK binary) compiles and **all tests pass**
+  (158 passed, 3 intentionally `#[ignore]`d pending a real Secret
+  Service/portal session; zero failures). This found and fixed several
+  real bugs during integration: a nonexistent `anyhow_lite` dependency,
+  a missing `PartialEq` derive, a missing parent-row foreign-key setup in
+  automation engine tests, stray `futures_core`/`Trigger` imports in
+  tests, and three provider-constructor call-site mismatches in
+  `src/services.rs` (the real `OpenAiProvider`/`AnthropicProvider`/
+  `GeminiProvider`/`OllamaProvider` constructors take different
+  arguments than first assumed). `cargo clippy --workspace --all-targets`
+  was also run and its safe auto-fixes applied; only style-level lints
+  remained (no correctness warnings).
+- **Not verified in this environment**: `meson`, `ninja`,
+  `blueprint-compiler`, and `flatpak-builder` are not installed here, so
+  the Meson build (`src/meson.build`'s `blueprint-compiler batch-compile`
+  invocation and the `cargo-build` custom target calling
+  `build-aux/cargo.sh`), the actual `.blp` → `.ui` compilation, and the
+  Flatpak build have **not** been exercised end-to-end. These follow
+  patterns seen in real GNOME Rust app templates (Fractal/Shortwave-
+  style) but their exact CLI flags should be re-verified against current
+  `--help` output the first time a real build is attempted; see
+  `docs/BUILDING.md`.
 - **GNOME runtime version**: `build-aux/flatpak/io.github.GITHUB_OWNER.Nexus.json`
   pins `org.gnome.Platform`/`org.gnome.Sdk` version `47`. Re-check this
   against `flatpak remote-info flathub org.gnome.Platform` before
   building — GNOME ships a new numbered runtime yearly and 47 may already
   be superseded by the time you read this.
 - **`cargo-sources.json`** referenced by the Flatpak manifest does not
-  exist in this repository and cannot until a `Cargo.lock` exists (which
-  requires running `cargo generate-lockfile` with network access at least
-  once). See `docs/BUILDING.md`.
-- **Fractal/Shortwave-style Meson+Cargo integration** (`build-aux/cargo.sh`,
-  the `blueprint-compiler batch-compile` invocation in `src/meson.build`)
-  follows patterns seen in real GNOME Rust app templates but has not been
-  run end-to-end here; the exact `meson`/`blueprint-compiler` CLI flags
-  should be re-verified against their current `--help` output if the
-  build fails at that step.
+  exist in this repository yet. A real `Cargo.lock` now does exist (`cargo
+  check`/`cargo test` generated and committed one); regenerate
+  `cargo-sources.json` from it with `flatpak-cargo-generator.py` before a
+  real Flatpak build (see `docs/BUILDING.md`) — do not reuse a stale copy
+  if `Cargo.lock` changes afterward.
+- **`src/services.rs`** (the `Services` struct bundling the store, secret
+  store, provider/CLI-agent registries, and pricing table) is wired into
+  the build (`mod services;` in `main.rs`) and compiles, but is **not yet
+  constructed or used anywhere** — `NexusApplication` still opens the
+  store and a secret store through its own separate `OnceLock` fields.
+  Replacing those with `Services::bootstrap` and threading the result
+  through to `preferences.rs` and every view is the next integration
+  step; see the doc comment at the top of `src/services.rs`.
 
 ## Providers (`crates/nexus-providers`)
 

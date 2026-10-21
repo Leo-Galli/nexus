@@ -17,7 +17,7 @@ pub mod step;
 pub mod template;
 pub mod trigger;
 
-pub use engine::{execute_automation, ExecutionContext, StepLogEntry};
+pub use engine::{ExecutionContext, StepLogEntry, execute_automation};
 pub use error::AutomationError;
 pub use notifier::Notifier;
 pub use step::{AutomationDefinition, Predicate, Step, StepConfig, TransformOp};

@@ -57,7 +57,10 @@ mod tests {
     #[test]
     fn passes_through_plain_text() {
         let vars = HashMap::new();
-        assert_eq!(render("no placeholders here", &vars).unwrap(), "no placeholders here");
+        assert_eq!(
+            render("no placeholders here", &vars).unwrap(),
+            "no placeholders here"
+        );
     }
 
     #[test]

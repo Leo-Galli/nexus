@@ -105,7 +105,10 @@ impl Services {
         // computes its own `SecretKey` internally (it knows its own
         // provider id); it returns `ProviderResult<Self>` because building
         // the underlying `reqwest::Client` can fail.
-        if configured.iter().any(|p| p == ProviderKind::OpenAi.as_str()) {
+        if configured
+            .iter()
+            .any(|p| p == ProviderKind::OpenAi.as_str())
+        {
             providers.insert(
                 ProviderKind::OpenAi.as_str().to_string(),
                 Arc::new(OpenAiProvider::new(self.secrets.clone())?),

@@ -107,7 +107,10 @@ mod tests {
     #[tokio::test]
     async fn status_reports_not_configured_with_explanation() {
         let provider = BedrockProvider::new();
-        let status = provider.status().await.expect("status() itself must not error");
+        let status = provider
+            .status()
+            .await
+            .expect("status() itself must not error");
         assert!(!status.configured);
         assert!(status.detail.is_some());
     }

@@ -47,8 +47,8 @@ use nexus_core::provider::{AuthMethod, ChatStream, Provider, ProviderKind, Provi
 use nexus_core::secrets::{SecretKey, SecretStore};
 
 use super::openai::{
-    build_openai_sse_stream, error_from_response, role_to_str, OpenAiChatRequestBody, OpenAiMessage,
-    OpenAiStreamOptions, OpenAiToolDef,
+    OpenAiChatRequestBody, OpenAiMessage, OpenAiStreamOptions, OpenAiToolDef,
+    build_openai_sse_stream, error_from_response, role_to_str,
 };
 
 const USER_AGENT: &str = "nexus-providers (openai-compatible)";
@@ -257,7 +257,11 @@ impl OpenAiCompatibleProvider {
     }
 
     fn endpoint(&self, suffix: &str) -> String {
-        format!("{}/{}", self.base_url.as_str().trim_end_matches('/'), suffix)
+        format!(
+            "{}/{}",
+            self.base_url.as_str().trim_end_matches('/'),
+            suffix
+        )
     }
 
     async fn resolve_api_key(&self) -> ProviderResult<Option<String>> {
@@ -401,13 +405,14 @@ impl Provider for OpenAiCompatibleProvider {
 
         let mut messages = Vec::new();
         if let Some(system) = &request.system_prompt
-            && !system.is_empty() {
-                messages.push(OpenAiMessage {
-                    role: "system".to_string(),
-                    content: system.clone(),
-                    tool_call_id: None,
-                });
-            }
+            && !system.is_empty()
+        {
+            messages.push(OpenAiMessage {
+                role: "system".to_string(),
+                content: system.clone(),
+                tool_call_id: None,
+            });
+        }
         for m in &request.messages {
             messages.push(OpenAiMessage {
                 role: role_to_str(m.role).to_string(),
@@ -426,13 +431,18 @@ impl Provider for OpenAiCompatibleProvider {
             model: &request.model_id,
             messages,
             stream: true,
-            stream_options: OpenAiStreamOptions { include_usage: true },
+            stream_options: OpenAiStreamOptions {
+                include_usage: true,
+            },
             temperature: request.temperature,
             max_tokens: request.max_tokens,
             tools,
         };
 
-        let mut req = self.http.post(self.endpoint("chat/completions")).json(&body);
+        let mut req = self
+            .http
+            .post(self.endpoint("chat/completions"))
+            .json(&body);
         if let Some(key) = &key {
             req = req.bearer_auth(key);
         }
@@ -492,8 +502,13 @@ mod tests {
         let secrets = Arc::new(FakeSecretStore {
             key: Some(key.to_string()),
         });
-        OpenAiCompatibleProvider::custom(&base_url, Some(SecretKey::new("test", "default")), "Test", secrets)
-            .unwrap()
+        OpenAiCompatibleProvider::custom(
+            &base_url,
+            Some(SecretKey::new("test", "default")),
+            "Test",
+            secrets,
+        )
+        .unwrap()
     }
 
     #[tokio::test]

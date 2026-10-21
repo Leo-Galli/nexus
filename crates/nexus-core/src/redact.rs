@@ -22,13 +22,19 @@ fn patterns() -> &'static [Regex] {
 pub fn redact(input: &str) -> String {
     let mut out = input.to_string();
     for pattern in patterns() {
-        out = pattern.replace_all(&out, |caps: &regex::Captures| {
-            if caps.len() >= 3 {
-                format!("{}[REDACTED]{}", &caps[1], caps.get(3).map(|m| m.as_str()).unwrap_or(""))
-            } else {
-                "[REDACTED]".to_string()
-            }
-        }).into_owned();
+        out = pattern
+            .replace_all(&out, |caps: &regex::Captures| {
+                if caps.len() >= 3 {
+                    format!(
+                        "{}[REDACTED]{}",
+                        &caps[1],
+                        caps.get(3).map(|m| m.as_str()).unwrap_or("")
+                    )
+                } else {
+                    "[REDACTED]".to_string()
+                }
+            })
+            .into_owned();
     }
     out
 }

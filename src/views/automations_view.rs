@@ -34,9 +34,9 @@ use std::cell::RefCell;
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::glib;
+use nexus_automation::AutomationDefinition;
 use nexus_automation::step::{Predicate, Step, StepConfig, TransformOp};
 use nexus_automation::trigger::Trigger;
-use nexus_automation::AutomationDefinition;
 use nexus_store::models::Automation;
 use uuid::Uuid;
 
@@ -299,7 +299,9 @@ impl AutomationEditor {
         let imp = self.imp();
         let detail = imp.trigger_detail_row.text().to_string();
         match imp.trigger_row.selected() {
-            1 => Trigger::Scheduled { cron_expression: detail },
+            1 => Trigger::Scheduled {
+                cron_expression: detail,
+            },
             2 => Trigger::FolderChanged { path: detail },
             _ => Trigger::Manual,
         }
@@ -312,7 +314,10 @@ impl AutomationEditor {
             #[weak(rename_to = editor)]
             self,
             move |row| {
-                editor.imp().trigger_detail_row.set_visible(row.selected() != 0);
+                editor
+                    .imp()
+                    .trigger_detail_row
+                    .set_visible(row.selected() != 0);
             }
         ));
 
@@ -507,9 +512,18 @@ impl AutomationEditor {
         };
 
         let group = adw::PreferencesGroup::new();
-        let provider_row = adw::EntryRow::builder().title("Provider binding").text(&provider_binding).build();
-        let model_row = adw::EntryRow::builder().title("Model ID").text(&model_id).build();
-        let prompt_row = adw::EntryRow::builder().title("Prompt template").text(&prompt_template).build();
+        let provider_row = adw::EntryRow::builder()
+            .title("Provider binding")
+            .text(&provider_binding)
+            .build();
+        let model_row = adw::EntryRow::builder()
+            .title("Model ID")
+            .text(&model_id)
+            .build();
+        let prompt_row = adw::EntryRow::builder()
+            .title("Prompt template")
+            .text(&prompt_template)
+            .build();
         let system_row = adw::EntryRow::builder()
             .title("System prompt (optional)")
             .text(system_prompt.as_deref().unwrap_or(""))
@@ -522,7 +536,10 @@ impl AutomationEditor {
             .title("Max tokens (optional)")
             .text(max_tokens.map(|t| t.to_string()).unwrap_or_default())
             .build();
-        let output_row = adw::EntryRow::builder().title("Output variable").text(&output_variable).build();
+        let output_row = adw::EntryRow::builder()
+            .title("Output variable")
+            .text(&output_variable)
+            .build();
 
         for row in [
             &provider_row,
@@ -536,86 +553,119 @@ impl AutomationEditor {
             group.add(row);
         }
 
-        self.present_step_editor_dialog("Edit Prompt Step", &group, glib::clone!(
-            #[weak(rename_to = editor)]
-            self,
-            move || {
-                let system_prompt = {
-                    let t = system_row.text().to_string();
-                    if t.trim().is_empty() { None } else { Some(t) }
-                };
-                let temperature = temperature_row.text().parse::<f32>().ok();
-                let max_tokens = max_tokens_row.text().parse::<u32>().ok();
-                editor.apply_step_edit(
-                    index,
-                    Step::Prompt {
-                        provider_binding: provider_row.text().to_string(),
-                        model_id: model_row.text().to_string(),
-                        prompt_template: prompt_row.text().to_string(),
-                        system_prompt,
-                        temperature,
-                        max_tokens,
-                        output_variable: output_row.text().to_string(),
-                    },
-                );
-            }
-        ));
+        self.present_step_editor_dialog(
+            "Edit Prompt Step",
+            &group,
+            glib::clone!(
+                #[weak(rename_to = editor)]
+                self,
+                move || {
+                    let system_prompt = {
+                        let t = system_row.text().to_string();
+                        if t.trim().is_empty() { None } else { Some(t) }
+                    };
+                    let temperature = temperature_row.text().parse::<f32>().ok();
+                    let max_tokens = max_tokens_row.text().parse::<u32>().ok();
+                    editor.apply_step_edit(
+                        index,
+                        Step::Prompt {
+                            provider_binding: provider_row.text().to_string(),
+                            model_id: model_row.text().to_string(),
+                            prompt_template: prompt_row.text().to_string(),
+                            system_prompt,
+                            temperature,
+                            max_tokens,
+                            output_variable: output_row.text().to_string(),
+                        },
+                    );
+                }
+            ),
+        );
     }
 
     fn edit_notify_step(&self, index: usize, step: Step) {
-        let Step::Notify { title_template, body_template } = step else {
+        let Step::Notify {
+            title_template,
+            body_template,
+        } = step
+        else {
             return;
         };
         let group = adw::PreferencesGroup::new();
-        let title_row = adw::EntryRow::builder().title("Title template").text(&title_template).build();
-        let body_row = adw::EntryRow::builder().title("Body template").text(&body_template).build();
+        let title_row = adw::EntryRow::builder()
+            .title("Title template")
+            .text(&title_template)
+            .build();
+        let body_row = adw::EntryRow::builder()
+            .title("Body template")
+            .text(&body_template)
+            .build();
         group.add(&title_row);
         group.add(&body_row);
 
-        self.present_step_editor_dialog("Edit Notify Step", &group, glib::clone!(
-            #[weak(rename_to = editor)]
-            self,
-            move || {
-                editor.apply_step_edit(
-                    index,
-                    Step::Notify {
-                        title_template: title_row.text().to_string(),
-                        body_template: body_row.text().to_string(),
-                    },
-                );
-            }
-        ));
+        self.present_step_editor_dialog(
+            "Edit Notify Step",
+            &group,
+            glib::clone!(
+                #[weak(rename_to = editor)]
+                self,
+                move || {
+                    editor.apply_step_edit(
+                        index,
+                        Step::Notify {
+                            title_template: title_row.text().to_string(),
+                            body_template: body_row.text().to_string(),
+                        },
+                    );
+                }
+            ),
+        );
     }
 
     fn edit_write_file_step(&self, index: usize, step: Step) {
-        let Step::WriteFile { path_template, content_variable, append } = step else {
+        let Step::WriteFile {
+            path_template,
+            content_variable,
+            append,
+        } = step
+        else {
             return;
         };
         let group = adw::PreferencesGroup::new();
-        let path_row = adw::EntryRow::builder().title("Path template").text(&path_template).build();
+        let path_row = adw::EntryRow::builder()
+            .title("Path template")
+            .text(&path_template)
+            .build();
         let content_row = adw::EntryRow::builder()
             .title("Content variable")
             .text(&content_variable)
             .build();
-        let append_row = adw::SwitchRow::builder().title("Append instead of overwrite").active(append).build();
+        let append_row = adw::SwitchRow::builder()
+            .title("Append instead of overwrite")
+            .active(append)
+            .build();
         group.add(&path_row);
         group.add(&content_row);
         group.add(&append_row);
 
-        self.present_step_editor_dialog("Edit Write File Step", &group, glib::clone!(
-            #[weak(rename_to = editor)]
-            self,
-            move || {
-                editor.apply_step_edit(
-                    index,
-                    Step::WriteFile {
-                        path_template: path_row.text().to_string(),
-                        content_variable: content_row.text().to_string(),
-                        append: append_row.is_active(),
-                    },
-                );
-            }
-        ));
+        self.present_step_editor_dialog(
+            "Edit Write File Step",
+            &group,
+            glib::clone!(
+                #[weak(rename_to = editor)]
+                self,
+                move || {
+                    editor.apply_step_edit(
+                        index,
+                        Step::WriteFile {
+                            path_template: path_row.text().to_string(),
+                            content_variable: content_row.text().to_string(),
+                            append: append_row.is_active(),
+                        },
+                    );
+                }
+            ),
+        );
     }
 
     /// Simplified editor for `CliCommand`, `Transform`, and `Condition`:
@@ -631,68 +681,100 @@ impl AutomationEditor {
                 working_dir_template,
                 output_variable,
             } => {
-                let agent_row = adw::EntryRow::builder().title("Agent binding").text(&agent_binding).build();
-                let prompt_row = adw::EntryRow::builder().title("Prompt template").text(&prompt_template).build();
+                let agent_row = adw::EntryRow::builder()
+                    .title("Agent binding")
+                    .text(&agent_binding)
+                    .build();
+                let prompt_row = adw::EntryRow::builder()
+                    .title("Prompt template")
+                    .text(&prompt_template)
+                    .build();
                 group.add(&agent_row);
                 group.add(&prompt_row);
-                self.present_step_editor_dialog("Edit CLI Command Step", &group, glib::clone!(
-                    #[weak(rename_to = editor)]
-                    self,
-                    move || {
-                        editor.apply_step_edit(
-                            index,
-                            Step::CliCommand {
-                                agent_binding: agent_row.text().to_string(),
-                                prompt_template: prompt_row.text().to_string(),
-                                working_dir_template: working_dir_template.clone(),
-                                output_variable: output_variable.clone(),
-                            },
-                        );
-                    }
-                ));
+                self.present_step_editor_dialog(
+                    "Edit CLI Command Step",
+                    &group,
+                    glib::clone!(
+                        #[weak(rename_to = editor)]
+                        self,
+                        move || {
+                            editor.apply_step_edit(
+                                index,
+                                Step::CliCommand {
+                                    agent_binding: agent_row.text().to_string(),
+                                    prompt_template: prompt_row.text().to_string(),
+                                    working_dir_template: working_dir_template.clone(),
+                                    output_variable: output_variable.clone(),
+                                },
+                            );
+                        }
+                    ),
+                );
             }
             Step::Transform {
                 input_variable,
                 operation,
                 output_variable,
             } => {
-                let input_row = adw::EntryRow::builder().title("Input variable").text(&input_variable).build();
-                let output_row = adw::EntryRow::builder().title("Output variable").text(&output_variable).build();
+                let input_row = adw::EntryRow::builder()
+                    .title("Input variable")
+                    .text(&input_variable)
+                    .build();
+                let output_row = adw::EntryRow::builder()
+                    .title("Output variable")
+                    .text(&output_variable)
+                    .build();
                 group.add(&input_row);
                 group.add(&output_row);
-                self.present_step_editor_dialog("Edit Transform Step", &group, glib::clone!(
-                    #[weak(rename_to = editor)]
-                    self,
-                    move || {
-                        editor.apply_step_edit(
-                            index,
-                            Step::Transform {
-                                input_variable: input_row.text().to_string(),
-                                operation: operation.clone(),
-                                output_variable: output_row.text().to_string(),
-                            },
-                        );
-                    }
-                ));
+                self.present_step_editor_dialog(
+                    "Edit Transform Step",
+                    &group,
+                    glib::clone!(
+                        #[weak(rename_to = editor)]
+                        self,
+                        move || {
+                            editor.apply_step_edit(
+                                index,
+                                Step::Transform {
+                                    input_variable: input_row.text().to_string(),
+                                    operation: operation.clone(),
+                                    output_variable: output_row.text().to_string(),
+                                },
+                            );
+                        }
+                    ),
+                );
             }
-            Step::Condition { input_variable, predicate, then_steps, else_steps } => {
-                let input_row = adw::EntryRow::builder().title("Input variable").text(&input_variable).build();
+            Step::Condition {
+                input_variable,
+                predicate,
+                then_steps,
+                else_steps,
+            } => {
+                let input_row = adw::EntryRow::builder()
+                    .title("Input variable")
+                    .text(&input_variable)
+                    .build();
                 group.add(&input_row);
-                self.present_step_editor_dialog("Edit Condition Step", &group, glib::clone!(
-                    #[weak(rename_to = editor)]
-                    self,
-                    move || {
-                        editor.apply_step_edit(
-                            index,
-                            Step::Condition {
-                                input_variable: input_row.text().to_string(),
-                                predicate: predicate.clone(),
-                                then_steps: then_steps.clone(),
-                                else_steps: else_steps.clone(),
-                            },
-                        );
-                    }
-                ));
+                self.present_step_editor_dialog(
+                    "Edit Condition Step",
+                    &group,
+                    glib::clone!(
+                        #[weak(rename_to = editor)]
+                        self,
+                        move || {
+                            editor.apply_step_edit(
+                                index,
+                                Step::Condition {
+                                    input_variable: input_row.text().to_string(),
+                                    predicate: predicate.clone(),
+                                    then_steps: then_steps.clone(),
+                                    else_steps: else_steps.clone(),
+                                },
+                            );
+                        }
+                    ),
+                );
             }
             _ => {}
         }
@@ -704,7 +786,10 @@ impl AutomationEditor {
         group: &adw::PreferencesGroup,
         on_save: impl Fn() + 'static,
     ) {
-        let dialog = adw::AlertDialog::builder().heading(heading).extra_child(group).build();
+        let dialog = adw::AlertDialog::builder()
+            .heading(heading)
+            .extra_child(group)
+            .build();
         dialog.add_response("cancel", "Cancel");
         dialog.add_response("save", "Save");
         dialog.set_response_appearance("save", adw::ResponseAppearance::Suggested);
@@ -754,7 +839,9 @@ mod view_imp {
         pub automations: RefCell<Vec<AutomationSummary>>,
         pub current_id: RefCell<Option<String>>,
         #[allow(clippy::type_complexity)]
-        pub on_save: RefCell<Vec<Box<dyn Fn(&super::AutomationsView, Option<String>, AutomationDefinition)>>>,
+        pub on_save: RefCell<
+            Vec<Box<dyn Fn(&super::AutomationsView, Option<String>, AutomationDefinition)>>,
+        >,
         #[allow(clippy::type_complexity)]
         pub on_enabled_toggled: RefCell<Vec<Box<dyn Fn(&super::AutomationsView, String, bool)>>>,
     }
@@ -950,16 +1037,18 @@ impl AutomationsView {
     }
 
     fn setup_signals(&self) {
-        self.imp().new_automation_button.connect_clicked(glib::clone!(
-            #[weak(rename_to = view)]
-            self,
-            move |_| {
-                *view.imp().current_id.borrow_mut() = None;
-                let editor = view.ensure_editor();
-                editor.clear_for_new();
-                view.show_editor();
-            }
-        ));
+        self.imp()
+            .new_automation_button
+            .connect_clicked(glib::clone!(
+                #[weak(rename_to = view)]
+                self,
+                move |_| {
+                    *view.imp().current_id.borrow_mut() = None;
+                    let editor = view.ensure_editor();
+                    editor.clear_for_new();
+                    view.show_editor();
+                }
+            ));
     }
 }
 

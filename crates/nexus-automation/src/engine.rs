@@ -3,8 +3,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
-use futures_util::future::{BoxFuture, FutureExt};
 use futures_util::StreamExt;
+use futures_util::future::{BoxFuture, FutureExt};
 use nexus_core::{ChatEvent, ChatMessage, ChatRequest, CliAgent, CommandRunner, Provider};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -189,7 +189,11 @@ async fn execute_step_kind(
                 .map_err(|e| AutomationError::CliUnsupported(e.to_string()))?;
             let output = ctx
                 .cli_runner
-                .run(&invocation.program, &invocation.args, invocation.cwd.as_deref())
+                .run(
+                    &invocation.program,
+                    &invocation.args,
+                    invocation.cwd.as_deref(),
+                )
                 .await?;
             if !output.success() {
                 return Err(AutomationError::CliFailed(format!(
@@ -198,7 +202,10 @@ async fn execute_step_kind(
                     String::from_utf8_lossy(&output.stderr)
                 )));
             }
-            vars.insert(output_variable.clone(), output.stdout_utf8_lossy().into_owned());
+            vars.insert(
+                output_variable.clone(),
+                output.stdout_utf8_lossy().into_owned(),
+            );
             Ok(())
         }
         Step::Transform {
@@ -218,7 +225,9 @@ async fn execute_step_kind(
                 TransformOp::ExtractRegex { pattern } => {
                     let re = Regex::new(pattern)
                         .map_err(|e| AutomationError::InvalidRegex(e.to_string()))?;
-                    re.find(&input).map(|m| m.as_str().to_string()).unwrap_or_default()
+                    re.find(&input)
+                        .map(|m| m.as_str().to_string())
+                        .unwrap_or_default()
                 }
             };
             vars.insert(output_variable.clone(), output);

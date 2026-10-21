@@ -65,7 +65,10 @@ impl OpenAiProvider {
     /// constructor keeps that restriction since the real OpenAI API is
     /// always `https`).
     #[cfg(test)]
-    fn with_base_url(secrets: Arc<dyn SecretStore>, base_url: impl Into<String>) -> ProviderResult<Self> {
+    fn with_base_url(
+        secrets: Arc<dyn SecretStore>,
+        base_url: impl Into<String>,
+    ) -> ProviderResult<Self> {
         Ok(Self {
             http: build_local_http_client(USER_AGENT)?,
             secrets,
@@ -159,8 +162,9 @@ impl Provider for OpenAiProvider {
         }
 
         let body = resp.text().await.map_err(ProviderError::Network)?;
-        let parsed: OpenAiModelsResponse = serde_json::from_str(&body)
-            .map_err(|e| ProviderError::InvalidResponse(format!("unexpected /models shape: {e}")))?;
+        let parsed: OpenAiModelsResponse = serde_json::from_str(&body).map_err(|e| {
+            ProviderError::InvalidResponse(format!("unexpected /models shape: {e}"))
+        })?;
 
         Ok(parsed
             .data
@@ -184,13 +188,14 @@ impl Provider for OpenAiProvider {
 
         let mut messages = Vec::new();
         if let Some(system) = &request.system_prompt
-            && !system.is_empty() {
-                messages.push(OpenAiMessage {
-                    role: "system".to_string(),
-                    content: system.clone(),
-                    tool_call_id: None,
-                });
-            }
+            && !system.is_empty()
+        {
+            messages.push(OpenAiMessage {
+                role: "system".to_string(),
+                content: system.clone(),
+                tool_call_id: None,
+            });
+        }
         for m in &request.messages {
             messages.push(OpenAiMessage {
                 role: role_to_str(m.role).to_string(),
@@ -209,7 +214,9 @@ impl Provider for OpenAiProvider {
             model: &request.model_id,
             messages,
             stream: true,
-            stream_options: OpenAiStreamOptions { include_usage: true },
+            stream_options: OpenAiStreamOptions {
+                include_usage: true,
+            },
             temperature: request.temperature,
             max_tokens: request.max_tokens,
             tools,
@@ -340,9 +347,10 @@ pub(crate) fn parse_openai_chunk(
 
     for choice in chunk.choices {
         if let Some(content) = choice.delta.content
-            && !content.is_empty() {
-                events.push(ChatEvent::TextDelta(content));
-            }
+            && !content.is_empty()
+        {
+            events.push(ChatEvent::TextDelta(content));
+        }
         for tc in choice.delta.tool_calls {
             let index = tc.index.unwrap_or(0);
             if let Some(id) = &tc.id {

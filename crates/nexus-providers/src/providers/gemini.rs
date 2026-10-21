@@ -60,7 +60,10 @@ impl GeminiProvider {
     /// Test-only: points at a local `wiremock` server; see the identical
     /// note in `openai.rs`.
     #[cfg(test)]
-    fn with_base_url(secrets: Arc<dyn SecretStore>, base_url: impl Into<String>) -> ProviderResult<Self> {
+    fn with_base_url(
+        secrets: Arc<dyn SecretStore>,
+        base_url: impl Into<String>,
+    ) -> ProviderResult<Self> {
         Ok(Self {
             http: build_local_http_client(USER_AGENT)?,
             secrets,
@@ -152,8 +155,9 @@ impl Provider for GeminiProvider {
         }
 
         let body = resp.text().await.map_err(ProviderError::Network)?;
-        let parsed: GeminiModelsResponse = serde_json::from_str(&body)
-            .map_err(|e| ProviderError::InvalidResponse(format!("unexpected /models shape: {e}")))?;
+        let parsed: GeminiModelsResponse = serde_json::from_str(&body).map_err(|e| {
+            ProviderError::InvalidResponse(format!("unexpected /models shape: {e}"))
+        })?;
 
         Ok(parsed
             .models
@@ -184,9 +188,10 @@ impl Provider for GeminiProvider {
 
         let mut system_parts = Vec::new();
         if let Some(system) = &request.system_prompt
-            && !system.is_empty() {
-                system_parts.push(system.clone());
-            }
+            && !system.is_empty()
+        {
+            system_parts.push(system.clone());
+        }
 
         let mut contents = Vec::new();
         for m in &request.messages {
@@ -335,9 +340,10 @@ fn parse_gemini_chunk(json: &str) -> ProviderResult<Vec<ChatEvent>> {
         if let Some(content) = candidate.content {
             for part in content.parts {
                 if let Some(text) = part.text
-                    && !text.is_empty() {
-                        events.push(ChatEvent::TextDelta(text));
-                    }
+                    && !text.is_empty()
+                {
+                    events.push(ChatEvent::TextDelta(text));
+                }
             }
         }
         if let Some(reason) = candidate.finish_reason {

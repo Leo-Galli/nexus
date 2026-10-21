@@ -31,7 +31,9 @@ use std::sync::OnceLock;
 
 use async_trait::async_trait;
 use nexus_core::cli_agent::{OutputFormat, UnsupportedMode};
-use nexus_core::{CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus};
+use nexus_core::{
+    CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus,
+};
 
 fn parse_version(stdout: &str) -> Option<String> {
     let trimmed = stdout.trim();
@@ -39,9 +41,10 @@ fn parse_version(stdout: &str) -> Option<String> {
         return None;
     }
     if let Ok(re) = regex::Regex::new(r"\d+\.\d+(?:\.\d+)?")
-        && let Some(found) = re.find(trimmed) {
-            return Some(found.as_str().to_string());
-        }
+        && let Some(found) = re.find(trimmed)
+    {
+        return Some(found.as_str().to_string());
+    }
     trimmed.lines().next().map(|s| s.to_string())
 }
 
@@ -139,7 +142,10 @@ impl CliAgent for GenericCliAgent {
         let version = if self.version_args.is_empty() {
             None
         } else {
-            match runner.run(&self.binary_name, &self.version_args, None).await {
+            match runner
+                .run(&self.binary_name, &self.version_args, None)
+                .await
+            {
                 Ok(output) => parse_version(&output.stdout_utf8_lossy()),
                 Err(_) => None,
             }
@@ -174,13 +180,12 @@ impl CliAgent for GenericCliAgent {
         }
         args.push(prompt.to_string());
 
-        if want_json
-            && let Some(flag) = &self.json_flag {
-                args.extend(flag.split_whitespace().map(|s| s.to_string()));
-            }
-            // No json_flag configured: silently no-op, mirroring the
-            // "unconfirmed, not confirmed-absent" treatment used for
-            // Qwen/Antigravity elsewhere in this crate.
+        if want_json && let Some(flag) = &self.json_flag {
+            args.extend(flag.split_whitespace().map(|s| s.to_string()));
+        }
+        // No json_flag configured: silently no-op, mirroring the
+        // "unconfirmed, not confirmed-absent" treatment used for
+        // Qwen/Antigravity elsewhere in this crate.
 
         args.extend(self.extra_args.iter().cloned());
 
@@ -286,16 +291,7 @@ mod tests {
 
     #[test]
     fn build_command_without_prompt_flag_is_positional() {
-        let agent = GenericCliAgent::new(
-            "id",
-            "Name",
-            "bin",
-            vec![],
-            None,
-            None,
-            vec![],
-            true,
-        );
+        let agent = GenericCliAgent::new("id", "Name", "bin", vec![], None, None, vec![], true);
         let cwd = PathBuf::from("/tmp/project");
         let invocation = agent
             .build_noninteractive_command("hello", &cwd, false)

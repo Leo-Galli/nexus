@@ -29,7 +29,9 @@ use std::path::Path;
 
 use async_trait::async_trait;
 use nexus_core::cli_agent::{OutputFormat, UnsupportedMode};
-use nexus_core::{CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus};
+use nexus_core::{
+    CliAgent, CliAgentInfo, CliDetectionResult, CliInvocation, CommandRunner, LoginStatus,
+};
 
 const BINARY_NAMES: &[&str] = &["gemini"];
 // No version flag confirmed against official docs - intentionally empty.
@@ -39,8 +41,7 @@ const VERSION_ARGS: &[&str] = &[];
 /// but a public GitHub issue (google-gemini/gemini-cli#9009) reports it
 /// is sometimes unreliable in practice. Surfaced here so a future UI can
 /// show a hint without this crate guessing at UI copy.
-pub const RELIABILITY_NOTE: &str =
-    "Gemini CLI's --output-format json mode is documented, but has been \
+pub const RELIABILITY_NOTE: &str = "Gemini CLI's --output-format json mode is documented, but has been \
      reported unreliable in some versions (see google-gemini/gemini-cli \
      issue #9009). Falling back to plain-text output may be necessary.";
 

@@ -63,12 +63,17 @@ impl CommandRunner for FakeCommandRunner {
             .unwrap()
             .push((program.to_string(), args.to_vec()));
         let key = (program.to_string(), args.to_vec());
-        self.run_results.lock().unwrap().get(&key).cloned().ok_or_else(|| {
-            std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!("no fake result programmed for {program} {args:?}"),
-            )
-        })
+        self.run_results
+            .lock()
+            .unwrap()
+            .get(&key)
+            .cloned()
+            .ok_or_else(|| {
+                std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    format!("no fake result programmed for {program} {args:?}"),
+                )
+            })
     }
 
     async fn which(&self, program: &str) -> Option<PathBuf> {
