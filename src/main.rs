@@ -19,6 +19,7 @@
 mod application;
 mod config;
 mod preferences;
+mod services;
 mod views;
 mod window;
 

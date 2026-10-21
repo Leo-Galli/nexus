@@ -1,7 +1,18 @@
 //! Shared, process-wide application state: the SQLite store, the secret
 //! store, the live provider/CLI-agent registries, and the command runner
-//! used for CLI invocations. Built once at startup by
-//! `NexusApplication`, then handed (by reference/`Rc`) to every view.
+//! used for CLI invocations. Intended to be built once at startup and
+//! handed (by reference/`Rc`) to every view.
+//!
+//! NOT YET WIRED INTO `NexusApplication`: `application.rs` currently opens
+//! the store and constructs a bare `KeyringSecretStore` itself, through
+//! its own ad-hoc `OnceLock` fields, and does not yet populate any
+//! provider/CLI-agent registry at all. `Services` is the intended next
+//! step — replace those ad-hoc fields with a single
+//! `services: OnceLock<Rc<Services>>` built via `Services::bootstrap`,
+//! and thread it through to `preferences.rs` and every view in
+//! `src/views/` instead of passing the store/secret-store separately.
+//! This module compiles and is unit-testable in isolation today; the
+//! integration itself is left for the next pass over the UI layer.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -84,19 +95,20 @@ impl Services {
     /// has a stored secret, plus the always-available local servers.
     /// Called at startup and whenever Preferences changes a connection.
     pub async fn reload_providers_from_secrets(&self) -> anyhow::Result<()> {
-        use nexus_core::{ProviderKind, SecretKey};
+        use nexus_core::ProviderKind;
         use nexus_providers::{AnthropicProvider, GeminiProvider, OllamaProvider, OpenAiProvider};
 
         let configured = self.secrets.list_configured_providers().await?;
         let mut providers = self.providers.borrow_mut();
 
+        // Each provider's `new` takes only the shared secret store and
+        // computes its own `SecretKey` internally (it knows its own
+        // provider id); it returns `ProviderResult<Self>` because building
+        // the underlying `reqwest::Client` can fail.
         if configured.iter().any(|p| p == ProviderKind::OpenAi.as_str()) {
             providers.insert(
                 ProviderKind::OpenAi.as_str().to_string(),
-                Arc::new(OpenAiProvider::new(
-                    self.secrets.clone(),
-                    SecretKey::default_for(ProviderKind::OpenAi.as_str()),
-                )),
+                Arc::new(OpenAiProvider::new(self.secrets.clone())?),
             );
         }
         if configured
@@ -105,10 +117,7 @@ impl Services {
         {
             providers.insert(
                 ProviderKind::Anthropic.as_str().to_string(),
-                Arc::new(AnthropicProvider::new(
-                    self.secrets.clone(),
-                    SecretKey::default_for(ProviderKind::Anthropic.as_str()),
-                )),
+                Arc::new(AnthropicProvider::new(self.secrets.clone())?),
             );
         }
         if configured
@@ -117,17 +126,14 @@ impl Services {
         {
             providers.insert(
                 ProviderKind::GoogleGemini.as_str().to_string(),
-                Arc::new(GeminiProvider::new(
-                    self.secrets.clone(),
-                    SecretKey::default_for(ProviderKind::GoogleGemini.as_str()),
-                )),
+                Arc::new(GeminiProvider::new(self.secrets.clone())?),
             );
         }
         // Local servers need no credential: always registered, `status()`
         // reports them unreachable rather than erroring when not running.
         providers.insert(
             ProviderKind::Ollama.as_str().to_string(),
-            Arc::new(OllamaProvider::default()),
+            Arc::new(OllamaProvider::new(None)?),
         );
         Ok(())
     }
