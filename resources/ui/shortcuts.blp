@@ -1,0 +1,56 @@
+using Gtk 4.0;
+
+// Loaded via `gtk::Builder::from_resource` + `builder.object("shortcuts_window")`
+// in `application.rs::show_shortcuts` -- NOT a composite template for a
+// custom widget type (plain `gtk::ShortcutsWindow`, chosen over
+// `Adw.ShortcutsDialog` since the latter needs libadwaita 1.6+ and this
+// project only requires >= 1.5, see `window.rs`'s matching VERIFY note).
+// Every accelerator below is one actually registered in `application.rs`
+// (`app.*`) or `window.rs` (`win.*`), or (for "Send Message") the
+// `GtkEventControllerKey` wired in `chat_view.rs`.
+ShortcutsWindow shortcuts_window {
+  modal: true;
+
+  ShortcutsSection {
+    section-name: "main";
+    max-height: 10;
+
+    ShortcutsGroup {
+      title: _("General");
+
+      ShortcutsShortcut {
+        title: _("Quit");
+        action-name: "app.quit";
+      }
+
+      ShortcutsShortcut {
+        title: _("Preferences");
+        action-name: "app.preferences";
+      }
+
+      ShortcutsShortcut {
+        title: _("Keyboard Shortcuts");
+        action-name: "app.shortcuts";
+      }
+
+      ShortcutsShortcut {
+        title: _("New Chat");
+        action-name: "win.new-chat";
+      }
+
+      ShortcutsShortcut {
+        title: _("Focus Sidebar Section");
+        accelerator: "<alt>1 <alt>2 <alt>3 <alt>4";
+      }
+    }
+
+    ShortcutsGroup {
+      title: _("Chat");
+
+      ShortcutsShortcut {
+        title: _("Send Message");
+        accelerator: "Return";
+      }
+    }
+  }
+}

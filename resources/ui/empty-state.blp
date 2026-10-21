@@ -1,0 +1,14 @@
+using Gtk 4.0;
+using Adw 1;
+
+// Reusable "nothing here yet" placeholder. NOT a composite-template
+// subclass: libadwaita-rs 0.9.2 does not expose a `StatusPageImpl`
+// subclassing trait for `Adw.StatusPage` (there is no `status_page.rs` in
+// its `subclass` module), so this is a plain object tree loaded via
+// `gtk::Builder::from_resource` + `builder.object("empty_state")` in
+// `views::new_empty_state`, which then sets `icon-name`/`title`/
+// `description` directly on the real `Adw.StatusPage` instance.
+Adw.StatusPage empty_state {
+  vexpand: true;
+  hexpand: true;
+}

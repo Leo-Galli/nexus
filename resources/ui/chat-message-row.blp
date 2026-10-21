@@ -1,0 +1,33 @@
+using Gtk 4.0;
+
+// One message bubble inside a model column. Role icon + plain-text content.
+//
+// Markdown is NOT rendered here -- `content_label` shows escaped plain text
+// (`GtkLabel` escapes its `label` property content automatically unless
+// `use-markup` is set, which we deliberately leave `false`). Real Markdown
+// rendering with code-block syntax highlighting is a follow-up that needs
+// either a maintained Rust Markdown-to-Pango renderer or a `GtkSourceView`
+// dependency, neither of which is in `Cargo.toml` yet.
+template $NexusChatMessageRow : Gtk.Box {
+  orientation: horizontal;
+  spacing: 8;
+  margin-start: 8;
+  margin-end: 8;
+  margin-top: 4;
+  margin-bottom: 4;
+
+  Image role_icon {
+    valign: start;
+    pixel-size: 20;
+  }
+
+  Label content_label {
+    wrap: true;
+    wrap-mode: word_char;
+    selectable: true;
+    use-markup: false;
+    xalign: 0;
+    hexpand: true;
+    valign: start;
+  }
+}

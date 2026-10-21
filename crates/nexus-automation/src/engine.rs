@@ -285,8 +285,9 @@ async fn execute_step_kind(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::trigger::Trigger;
     use async_trait::async_trait;
-    use futures_core::stream::BoxStream;
+    use futures_util::stream::BoxStream;
     use nexus_core::{
         AuthMethod, ChatStream, FinishReason, ModelInfo, ProviderError, ProviderKind,
         ProviderResult, ProviderStatus,
@@ -342,6 +343,26 @@ mod tests {
         }
     }
 
+    /// `automation_runs.automation_id` has a foreign key into
+    /// `automations.id`, so tests driving `execute_automation` against a
+    /// real `Store` must first create the parent automation row.
+    async fn seed_automation(store: &nexus_store::Store, id: &str) {
+        let now = Utc::now();
+        nexus_store::automations::upsert(
+            store,
+            nexus_store::models::Automation {
+                id: id.to_string(),
+                name: "test automation".to_string(),
+                definition_json: "{}".to_string(),
+                enabled: true,
+                created_at: now,
+                updated_at: now,
+            },
+        )
+        .await
+        .unwrap();
+    }
+
     #[tokio::test]
     async fn prompt_step_fills_variable() {
         let mut providers: HashMap<String, Arc<dyn Provider>> = HashMap::new();
@@ -354,6 +375,7 @@ mod tests {
         );
         let ctx = ctx_with(providers);
         let store = nexus_store::Store::open_in_memory().await.unwrap();
+        seed_automation(&store, "auto-1").await;
 
         let definition = AutomationDefinition {
             name: "t".into(),
@@ -400,6 +422,7 @@ mod tests {
         );
         let ctx = ctx_with(providers);
         let store = nexus_store::Store::open_in_memory().await.unwrap();
+        seed_automation(&store, "auto-1").await;
 
         let fallback_step = StepConfig {
             id: "s1-fallback".into(),
@@ -453,6 +476,7 @@ mod tests {
         );
         let ctx = ctx_with(providers);
         let store = nexus_store::Store::open_in_memory().await.unwrap();
+        seed_automation(&store, "auto-1").await;
 
         let then_step = StepConfig {
             id: "then-notify".into(),

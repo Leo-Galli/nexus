@@ -1,0 +1,77 @@
+using Gtk 4.0;
+using Adw 1;
+
+// The automation editor pane. Hosted inside `$NexusAutomationsView`'s
+// `editor_container` (added in Rust, not referenced here -- see the note
+// in `automations-view.blp`).
+template $NexusAutomationEditor : Gtk.Box {
+  orientation: vertical;
+  vexpand: true;
+  hexpand: true;
+
+  ScrolledWindow {
+    vexpand: true;
+    hscrollbar-policy: never;
+
+    child: Box {
+      orientation: vertical;
+      spacing: 18;
+      margin-start: 18;
+      margin-end: 18;
+      margin-top: 18;
+      margin-bottom: 18;
+
+      Adw.PreferencesGroup {
+        title: _("Details");
+
+        Adw.EntryRow name_row {
+          title: _("Name");
+        }
+
+        Adw.ComboRow trigger_row {
+          title: _("Trigger");
+          model: StringList trigger_model {
+            strings [_("Manual"), _("Scheduled"), _("Folder Changed")]
+          };
+        }
+
+        Adw.EntryRow trigger_detail_row {
+          title: _("Trigger detail (cron expression, or folder path)");
+        }
+      }
+
+      Box {
+        orientation: vertical;
+        spacing: 6;
+
+        Box {
+          orientation: horizontal;
+
+          Label {
+            label: _("Steps");
+            styles ["heading"]
+            hexpand: true;
+            xalign: 0;
+          }
+
+          Button add_step_button {
+            icon-name: "list-add-symbolic";
+            tooltip-text: _("Add step");
+            styles ["flat"]
+          }
+        }
+
+        ListBox steps_list {
+          styles ["boxed-list"]
+          selection-mode: none;
+        }
+      }
+
+      Button save_button {
+        label: _("Save Automation");
+        halign: end;
+        styles ["suggested-action", "pill"]
+      }
+    };
+  }
+}

@@ -1,0 +1,16 @@
+using Gtk 4.0;
+using Adw 1;
+
+// One row in the "add model to compare" popover's list. Title/subtitle are
+// set from Rust (`ModelPickerRow::set_model`) using the plain `title`/
+// `subtitle` properties `Adw.ActionRow` already provides.
+template $NexusModelPickerRow : Adw.ActionRow {
+  activatable: true;
+
+  [suffix]
+  Image checkmark {
+    icon-name: "object-select-symbolic";
+    visible: false;
+    valign: center;
+  }
+}

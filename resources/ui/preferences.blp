@@ -1,0 +1,107 @@
+using Gtk 4.0;
+using Adw 1;
+
+// VERIFY: `Adw.PreferencesDialog` (the `Adw.Dialog`-based replacement for
+// the older `Adw.PreferencesWindow`) is assumed current for libadwaita
+// 1.5+ (matching this project's `adw` crate `v1_5` feature gate). If a
+// future libadwaita-rs version used here turns out to predate it,
+// `Adw.PreferencesWindow` is the drop-in fallback with the same child
+// structure (`Adw.PreferencesPage`/`Adw.PreferencesGroup`).
+template $NexusPreferences : Adw.PreferencesDialog {
+  title: _("Preferences");
+
+  Adw.PreferencesPage accounts_page {
+    title: _("Accounts & Services");
+    icon-name: "network-server-symbolic";
+
+    Adw.PreferencesGroup {
+      title: _("AI Providers");
+      description: _("Add an API key or sign in to use a provider's models.");
+
+      ListBox providers_list {
+        styles ["boxed-list"]
+        selection-mode: none;
+      }
+    }
+  }
+
+  Adw.PreferencesPage models_page {
+    title: _("Models & Defaults");
+    icon-name: "preferences-other-symbolic";
+
+    Adw.PreferencesGroup {
+      title: _("Defaults for New Conversations");
+      description: _("These defaults are stored locally and are not part of a GSettings schema key, since none exists for them yet.");
+
+      Adw.SpinRow default_temperature_row {
+        title: _("Default temperature");
+        digits: 2;
+        adjustment: Adjustment {
+          lower: 0;
+          upper: 2;
+          step-increment: 0.1;
+          value: 0.7;
+        };
+      }
+
+      Adw.SpinRow default_max_tokens_row {
+        title: _("Default max tokens");
+        adjustment: Adjustment {
+          lower: 1;
+          upper: 200000;
+          step-increment: 256;
+          value: 4096;
+        };
+      }
+
+      Adw.EntryRow default_system_prompt_row {
+        title: _("Default system prompt");
+      }
+    }
+  }
+
+  Adw.PreferencesPage privacy_page {
+    title: _("Privacy");
+    icon-name: "view-reveal-symbolic";
+
+    Adw.PreferencesGroup {
+      title: _("Telemetry");
+
+      Adw.ActionRow {
+        title: _("Telemetry");
+        subtitle: _("Nexus collects no telemetry and sends no usage data anywhere. This switch is permanently off and not editable.");
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Local Data");
+
+      Adw.ActionRow {
+        title: _("Delete All Local Data");
+        subtitle: _("Permanently deletes every conversation and message stored on this device. Automations and usage history are not affected by this action.");
+
+        [suffix]
+        Button delete_all_data_button {
+          label: _("Delete");
+          valign: center;
+          styles ["destructive-action"]
+        }
+      }
+    }
+  }
+
+  Adw.PreferencesPage advanced_page {
+    title: _("Advanced");
+    icon-name: "applications-engineering-symbolic";
+
+    Adw.PreferencesGroup {
+      title: _("CLI Coding Agents");
+      description: _("See build-aux/flatpak/PERMISSIONS.md for the full justification of this permission.");
+
+      Adw.SwitchRow host_cli_execution_row {
+        title: _("Run CLI agents installed on this computer");
+        subtitle: _("Lets Nexus invoke CLI coding agent binaries on the host via flatpak-spawn when running sandboxed. The underlying D-Bus permission is granted at install time regardless of this switch; Nexus's own code only performs a host spawn when this is on. Off by default.");
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use thiserror::Error;
 
-#[derive(Debug, Clone, Copy, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
 pub struct ModelPrice {
     pub input_per_million_usd: f64,
     pub output_per_million_usd: f64,

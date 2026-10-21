@@ -1,0 +1,56 @@
+using Gtk 4.0;
+using Adw 1;
+
+// `session_stack`'s pages ("empty" at startup, plus one "terminal:<id>" or
+// "json:<id>" page per opened session) are added in Rust
+// (`agents_view.rs`), for the same reason `window.blp` builds its stack in
+// Rust: blueprint-compiler's GtkStack-page child-property syntax could not
+// be verified against a real binary in this sandbox.
+template $NexusAgentsView : Gtk.Box {
+  orientation: horizontal;
+  vexpand: true;
+  hexpand: true;
+
+  Box sidebar_box {
+    orientation: vertical;
+    width-request: 300;
+
+    ScrolledWindow {
+      vexpand: true;
+      hscrollbar-policy: never;
+
+      child: ListBox agent_list {
+        styles ["boxed-list"]
+        margin-start: 12;
+        margin-end: 12;
+        margin-top: 12;
+        margin-bottom: 12;
+        selection-mode: none;
+      };
+    }
+
+    Separator {}
+
+    Box options_box {
+      orientation: vertical;
+      spacing: 6;
+      margin-start: 12;
+      margin-end: 12;
+      margin-top: 8;
+      margin-bottom: 12;
+
+      CheckButton confirm_before_actions_check {
+        label: _("Confirm before running file-touching commands");
+        active: true;
+      }
+    }
+  }
+
+  Separator {}
+
+  Stack session_stack {
+    hexpand: true;
+    vexpand: true;
+    transition-type: crossfade;
+  }
+}

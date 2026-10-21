@@ -48,6 +48,7 @@ toml = "0.8"
 cron = "0.12"
 which = "6.0"
 regex = "1.10"
+anyhow = "1.0"
 
 [workspace.dependencies.wiremock]
 version = "0.6"
@@ -112,6 +113,7 @@ uuid.workspace = true
 gettext-rs.workspace = true
 async-trait.workspace = true
 futures-core.workspace = true
+anyhow.workspace = true
 
 # GNOME Rust bindings. Versions verified mutually compatible on crates.io
 # on 2026-10-21 (vte4 0.10.0 was the first release to move to gtk4 ^0.11,

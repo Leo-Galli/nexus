@@ -1,0 +1,104 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $NexusChatView : Gtk.Box {
+  orientation: vertical;
+  vexpand: true;
+  hexpand: true;
+
+  Box model_bar {
+    orientation: horizontal;
+    spacing: 6;
+    margin-start: 12;
+    margin-end: 12;
+    margin-top: 8;
+    margin-bottom: 8;
+
+    FlowBox model_chips {
+      hexpand: true;
+      selection-mode: none;
+      max-children-per-line: 20;
+      row-spacing: 4;
+      column-spacing: 4;
+    }
+
+    MenuButton add_model_button {
+      icon-name: "list-add-symbolic";
+      tooltip-text: _("Add a model to compare");
+      valign: center;
+
+      popover: Popover model_picker_popover {
+        width-request: 320;
+        height-request: 360;
+
+        child: ScrolledWindow {
+          hscrollbar-policy: never;
+
+          child: ListBox model_picker_list {
+            styles ["boxed-list"]
+          };
+        };
+      };
+    }
+  }
+
+  Separator {}
+
+  ScrolledWindow columns_scroller {
+    vexpand: true;
+    hscrollbar-policy: automatic;
+    vscrollbar-policy: never;
+
+    child: Box columns_box {
+      orientation: horizontal;
+      spacing: 1;
+      homogeneous: true;
+    };
+  }
+
+  Separator {}
+
+  Box composer_box {
+    orientation: horizontal;
+    spacing: 6;
+    margin-start: 12;
+    margin-end: 12;
+    margin-top: 8;
+    margin-bottom: 12;
+
+    Button attach_button {
+      icon-name: "mail-attachment-symbolic";
+      tooltip-text: _("Attach a file");
+      valign: end;
+    }
+
+    ScrolledWindow composer_scroller {
+      hexpand: true;
+      max-content-height: 120;
+      propagate-natural-height: true;
+      hscrollbar-policy: never;
+      styles ["card"]
+
+      child: TextView composer_text {
+        wrap-mode: word_char;
+        top-margin: 8;
+        bottom-margin: 8;
+        left-margin: 8;
+        right-margin: 8;
+      };
+    }
+
+    Button stop_button {
+      icon-name: "media-playback-stop-symbolic";
+      tooltip-text: _("Stop streaming");
+      valign: end;
+      sensitive: false;
+    }
+
+    Button send_button {
+      label: _("Send");
+      valign: end;
+      styles ["suggested-action"]
+    }
+  }
+}

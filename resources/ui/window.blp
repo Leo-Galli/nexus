@@ -1,0 +1,174 @@
+using Gtk 4.0;
+using Adw 1;
+
+// Root window template. The four view widgets (ChatView, AgentsView,
+// AutomationsView, StatsView) are intentionally NOT instantiated here as
+// nested custom-type objects: `window.rs` creates them in Rust and adds
+// them to `content_stack` via `Gtk.Stack.add_named`, to avoid depending on
+// blueprint-compiler's GtkStack-page child-property syntax, which could not
+// be verified against a real `blueprint-compiler` binary in this sandbox
+// (not installed here -- see the implementation report).
+template $NexusWindow : Adw.ApplicationWindow {
+  title: _("Nexus");
+  width-request: 360;
+  height-request: 294;
+
+  content: Adw.ToastOverlay toast_overlay {
+    child: Adw.NavigationSplitView split_view {
+      min-sidebar-width: 220;
+      max-sidebar-width: 280;
+
+      sidebar: Adw.NavigationPage {
+        title: _("Nexus");
+        child: Adw.ToolbarView {
+          [top]
+          Adw.HeaderBar {}
+
+          content: ScrolledWindow {
+            hscrollbar-policy: never;
+            child: ListBox sidebar_list {
+              styles ["navigation-sidebar"]
+
+              ListBoxRow {
+                name: "chat";
+                child: Box {
+                  orientation: horizontal;
+                  spacing: 12;
+                  margin-start: 12;
+                  margin-end: 12;
+                  margin-top: 8;
+                  margin-bottom: 8;
+
+                  Image {
+                    icon-name: "chat-bubble-text-symbolic";
+                  }
+
+                  Label {
+                    label: _("Chat");
+                    xalign: 0;
+                    hexpand: true;
+                  }
+                };
+              }
+
+              ListBoxRow {
+                name: "agents";
+                child: Box {
+                  orientation: horizontal;
+                  spacing: 12;
+                  margin-start: 12;
+                  margin-end: 12;
+                  margin-top: 8;
+                  margin-bottom: 8;
+
+                  Image {
+                    icon-name: "utilities-terminal-symbolic";
+                  }
+
+                  Label {
+                    label: _("Agents");
+                    xalign: 0;
+                    hexpand: true;
+                  }
+                };
+              }
+
+              ListBoxRow {
+                name: "automations";
+                child: Box {
+                  orientation: horizontal;
+                  spacing: 12;
+                  margin-start: 12;
+                  margin-end: 12;
+                  margin-top: 8;
+                  margin-bottom: 8;
+
+                  Image {
+                    icon-name: "system-run-symbolic";
+                  }
+
+                  Label {
+                    label: _("Automations");
+                    xalign: 0;
+                    hexpand: true;
+                  }
+                };
+              }
+
+              ListBoxRow {
+                name: "stats";
+                child: Box {
+                  orientation: horizontal;
+                  spacing: 12;
+                  margin-start: 12;
+                  margin-end: 12;
+                  margin-top: 8;
+                  margin-bottom: 8;
+
+                  Image {
+                    icon-name: "x-office-spreadsheet-symbolic";
+                  }
+
+                  Label {
+                    label: _("Statistics");
+                    xalign: 0;
+                    hexpand: true;
+                  }
+                };
+              }
+            };
+          };
+        };
+      };
+
+      content: Adw.NavigationPage {
+        title: _("Nexus");
+        child: Adw.ToolbarView {
+          [top]
+          Adw.HeaderBar {
+            [end]
+            MenuButton {
+              icon-name: "open-menu-symbolic";
+              tooltip-text: _("Main Menu");
+              menu-model: primary_menu;
+              primary: true;
+            }
+          }
+
+          // Pages ("chat", "agents", "automations", "stats") are added in
+          // Rust (`window.rs::setup_views`), matching the `name` values
+          // used by the sidebar rows above.
+          content: Stack content_stack {
+            transition-type: crossfade;
+          };
+        };
+      };
+    };
+  };
+}
+
+menu primary_menu {
+  section {
+    item {
+      label: _("_Preferences");
+      action: "app.preferences";
+    }
+
+    item {
+      label: _("_Keyboard Shortcuts");
+      action: "app.shortcuts";
+    }
+
+    item {
+      label: _("_About Nexus");
+      action: "app.about";
+    }
+  }
+
+  section {
+    item {
+      label: _("_Quit");
+      action: "app.quit";
+    }
+  }
+}

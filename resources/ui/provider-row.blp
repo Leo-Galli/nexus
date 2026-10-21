@@ -1,0 +1,59 @@
+using Gtk 4.0;
+using Adw 1;
+
+// One provider in the "Accounts & Services" preferences page.
+// `Adw.ExpanderRow` is used as the base so the API-key entry (or the OAuth
+// "launch CLI login" row) can be revealed inline without a separate
+// dialog; non-`[prefix]`/`[suffix]` children are routed to
+// `Adw.ExpanderRow.add_row()` automatically by its `GtkBuildable`
+// implementation, which is how `key_entry_row`/`key_actions_row`/
+// `oauth_actions_row` below end up as its expansion content.
+template $NexusProviderRow : Adw.ExpanderRow {
+  [suffix]
+  Label status_badge {
+    styles ["dim-label", "caption"]
+    valign: center;
+  }
+
+  Adw.EntryRow key_entry_row {
+    title: _("API Key");
+    visible: false;
+  }
+
+  Adw.ActionRow key_actions_row {
+    visible: false;
+
+    [suffix]
+    Button open_key_page_button {
+      icon-name: "external-link-symbolic";
+      tooltip-text: _("Open API key page");
+      valign: center;
+      styles ["flat"]
+    }
+
+    [suffix]
+    Button save_key_button {
+      label: _("Save");
+      valign: center;
+      styles ["suggested-action"]
+    }
+
+    [suffix]
+    Button disconnect_button {
+      label: _("Disconnect");
+      valign: center;
+      styles ["destructive-action"]
+    }
+  }
+
+  Adw.ActionRow oauth_actions_row {
+    visible: false;
+    title: _("Sign in via the provider's CLI login flow");
+
+    [suffix]
+    Button launch_login_button {
+      label: _("Launch CLI Login");
+      valign: center;
+    }
+  }
+}

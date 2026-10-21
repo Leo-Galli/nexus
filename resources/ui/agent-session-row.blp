@@ -1,0 +1,47 @@
+using Gtk 4.0;
+using Adw 1;
+
+// One row per detected/known CLI agent in the Agents view's sidebar list.
+template $NexusAgentSessionRow : Adw.ActionRow {
+  activatable: false;
+
+  [prefix]
+  Image agent_icon {
+    icon-name: "utilities-terminal-symbolic";
+    valign: center;
+    pixel-size: 24;
+  }
+
+  [suffix]
+  Box badges_box {
+    orientation: horizontal;
+    spacing: 6;
+    valign: center;
+
+    Label installed_badge {
+      styles ["dim-label", "caption"]
+    }
+
+    Label version_badge {
+      styles ["dim-label", "caption"]
+    }
+
+    Label login_badge {
+      styles ["dim-label", "caption"]
+    }
+  }
+
+  [suffix]
+  Button run_once_button {
+    label: _("Run Once");
+    valign: center;
+    styles ["flat"]
+  }
+
+  [suffix]
+  Button new_session_button {
+    label: _("New Session");
+    valign: center;
+    styles ["flat"]
+  }
+}

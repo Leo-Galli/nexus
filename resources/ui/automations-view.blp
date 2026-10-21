@@ -1,0 +1,58 @@
+using Gtk 4.0;
+using Adw 1;
+
+// `editor_container`'s child (either an `EmptyState` or a
+// `$NexusAutomationEditor`) is set in Rust, same reasoning as the other
+// views that avoid blueprint-compiler's less-certain extension syntax.
+template $NexusAutomationsView : Gtk.Box {
+  orientation: horizontal;
+  vexpand: true;
+  hexpand: true;
+
+  Box sidebar_box {
+    orientation: vertical;
+    width-request: 300;
+
+    Box {
+      orientation: horizontal;
+      margin-start: 12;
+      margin-end: 12;
+      margin-top: 12;
+      margin-bottom: 6;
+
+      Label {
+        label: _("Automations");
+        styles ["heading"]
+        hexpand: true;
+        xalign: 0;
+      }
+
+      Button new_automation_button {
+        icon-name: "list-add-symbolic";
+        tooltip-text: _("New automation");
+        styles ["flat"]
+      }
+    }
+
+    ScrolledWindow {
+      vexpand: true;
+      hscrollbar-policy: never;
+
+      child: ListBox automation_list {
+        styles ["boxed-list"]
+        margin-start: 12;
+        margin-end: 12;
+        margin-bottom: 12;
+        selection-mode: none;
+      };
+    }
+  }
+
+  Separator {}
+
+  Box editor_container {
+    orientation: vertical;
+    hexpand: true;
+    vexpand: true;
+  }
+}

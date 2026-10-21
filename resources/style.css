@@ -1,0 +1,39 @@
+/*
+ * Minimal supplemental stylesheet. GNOME HIG apps should need very little
+ * custom CSS on top of the system libadwaita theme -- everything here is
+ * either impossible to express with stock style classes (the chat "model
+ * chip" shape, the stats bar chart) or a small spacing tweak.
+ *
+ * No literal hex colors are used anywhere a color could look wrong in dark
+ * mode: `@accent_bg_color`/`@accent_fg_color`/`currentColor` and the
+ * standard libadwaita named colors are used instead, so this file does not
+ * need separate light/dark blocks.
+ */
+
+.nexus-model-chip {
+  padding: 2px 4px 2px 10px;
+  border-radius: 999px;
+  background-color: alpha(currentColor, 0.08);
+}
+
+.nexus-chat-column {
+  border-right: 1px solid alpha(currentColor, 0.1);
+}
+
+.nexus-chat-column:last-child {
+  border-right: none;
+}
+
+.nexus-chat-column-list row {
+  margin-bottom: 2px;
+}
+
+.nexus-error-row {
+  color: @error_color;
+}
+
+.nexus-stats-bar {
+  background-color: @accent_bg_color;
+  border-radius: 3px 3px 0 0;
+  min-width: 24px;
+}

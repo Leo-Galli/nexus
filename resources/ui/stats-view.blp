@@ -1,0 +1,114 @@
+using Gtk 4.0;
+using Adw 1;
+
+// `AdwToggleGroup` is an AdwToggleGroup widget only in libadwaita 1.7+, which
+// this project does not depend on (`adw` is feature-gated at `v1_5` in
+// Cargo.toml, matching the `>= 1.5` Meson dependency check). The
+// granularity and date-range switchers below are therefore plain
+// `Gtk.Box`es of linked `GtkToggleButton`s (the `.linked` style class),
+// which is the well-established pre-AdwToggleGroup pattern.
+template $NexusStatsView : Gtk.Box {
+  orientation: vertical;
+  vexpand: true;
+  hexpand: true;
+
+  ScrolledWindow {
+    vexpand: true;
+    hscrollbar-policy: never;
+
+    child: Box {
+      orientation: vertical;
+      spacing: 18;
+      margin-start: 18;
+      margin-end: 18;
+      margin-top: 18;
+      margin-bottom: 18;
+
+      Box filter_bar {
+        orientation: horizontal;
+        spacing: 12;
+
+        // These three-way exclusive groups are NOT wired via
+        // `GtkToggleButton`'s `set_group()` (added in GTK 4.10 as a plain
+        // method, not a GObject property blueprint-compiler could bind to
+        // here) -- `stats_view.rs` enforces mutual exclusivity itself by
+        // listening to each button's `toggled` signal and deactivating its
+        // siblings.
+        Box {
+          styles ["linked"]
+
+          ToggleButton granularity_day {
+            label: _("Day");
+            active: true;
+          }
+
+          ToggleButton granularity_week {
+            label: _("Week");
+          }
+
+          ToggleButton granularity_month {
+            label: _("Month");
+          }
+        }
+
+        Box {
+          styles ["linked"]
+
+          ToggleButton preset_7_days {
+            label: _("Last 7 Days");
+          }
+
+          ToggleButton preset_30_days {
+            label: _("Last 30 Days");
+          }
+
+          ToggleButton preset_all_time {
+            label: _("All Time");
+            active: true;
+          }
+        }
+
+        DropDown provider_dropdown {
+          tooltip-text: _("Filter by provider");
+        }
+
+        DropDown model_dropdown {
+          tooltip-text: _("Filter by model");
+        }
+
+        Button export_csv_button {
+          icon-name: "document-save-symbolic";
+          label: _("Export CSV");
+          hexpand: true;
+          halign: end;
+        }
+      }
+
+      Grid summary_grid {
+        column-spacing: 12;
+        row-spacing: 12;
+        column-homogeneous: true;
+      }
+
+      Separator {}
+
+      Label {
+        label: _("Tokens per bucket");
+        styles ["heading"]
+        xalign: 0;
+      }
+
+      ScrolledWindow {
+        hscrollbar-policy: automatic;
+        vscrollbar-policy: never;
+        min-content-height: 160;
+
+        child: Box bars_box {
+          orientation: horizontal;
+          spacing: 4;
+          valign: end;
+        };
+      }
+    };
+  }
+}
