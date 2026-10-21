@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/io/github/GITHUB_OWNER/Nexus">
+    <file compressed="true">style.css</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/window.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/chat-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/chat-message-row.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/model-picker-row.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/agents-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/agent-session-row.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/automations-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/automation-editor.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/stats-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/preferences.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/provider-row.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/shortcuts.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/empty-state.ui</file>
+  </gresource>
+</gresources>

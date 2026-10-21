@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="io.github.GITHUB_OWNER.Nexus" path="/io/github/GITHUB_OWNER/Nexus/">
+
+    <key name="window-width" type="i">
+      <default>1000</default>
+      <summary>Window width</summary>
+      <description>The last saved width of the main window, in logical pixels, used to restore window size on startup.</description>
+    </key>
+
+    <key name="window-height" type="i">
+      <default>700</default>
+      <summary>Window height</summary>
+      <description>The last saved height of the main window, in logical pixels, used to restore window size on startup.</description>
+    </key>
+
+    <key name="window-maximized" type="b">
+      <default>false</default>
+      <summary>Window maximized state</summary>
+      <description>Whether the main window was maximized when last closed, used to restore window state on startup.</description>
+    </key>
+
+    <key name="enabled-host-cli-execution" type="b">
+      <default>false</default>
+      <summary>Allow running CLI coding agents installed on the host</summary>
+      <description>
+        Whether Nexus is allowed to invoke CLI coding agent binaries
+        installed on the host system via flatpak-spawn --host. This is an
+        explicit, off-by-default opt-in: the underlying D-Bus permission
+        (--talk-name=org.freedesktop.Flatpak) is declared statically in the
+        Flatpak manifest because Flatpak has no concept of an in-app
+        toggleable D-Bus permission, but Nexus's own code never performs a
+        host spawn unless this setting is true. See
+        build-aux/flatpak/PERMISSIONS.md for the full explanation.
+      </description>
+    </key>
+
+    <key name="telemetry-enabled" type="b">
+      <default>false</default>
+      <summary>Telemetry (always off)</summary>
+      <description>
+        Nexus collects no telemetry and sends no usage data anywhere. This
+        key exists only so the Privacy preferences page has a concrete,
+        documented switch to display as permanently off; it is not wired to
+        any data-collection or network-reporting code, and Nexus has no
+        mechanism that would turn it on by itself.
+      </description>
+    </key>
+
+    <key name="pricing-table-last-updated" type="s">
+      <default>''</default>
+      <summary>Pricing table last-updated timestamp</summary>
+      <description>ISO 8601 timestamp recording when the bundled provider pricing table (used for local usage-cost estimates) was last updated. Empty if never recorded.</description>
+    </key>
+
+    <key name="default-chat-model-ids" type="as">
+      <default>[]</default>
+      <summary>Default chat model identifiers</summary>
+      <description>Ordered list of provider/model identifiers to pre-select when opening a new multi-model chat comparison. Empty by default.</description>
+    </key>
+
+  </schema>
+</schemalist>

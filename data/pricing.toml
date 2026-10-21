@@ -1,0 +1,24 @@
+# Nexus pricing table.
+#
+# This file is intentionally shipped EMPTY. Per-token prices change
+# frequently and differ by provider, model, region and sometimes account
+# tier; Nexus's cost estimates must never guess a price. Until a model is
+# listed here, its estimated cost is reported as "unknown" in the
+# Statistics page, never as zero or an invented number.
+#
+# To add a price, look it up on the provider's own official pricing page
+# and add an entry in this exact shape (provider id matches
+# `nexus_core::ProviderKind::as_str()`, model id matches the id the
+# provider's own API returns):
+#
+# [openai."gpt-4o-mini"]
+# input_per_million_usd = 0.15
+# output_per_million_usd = 0.60
+#
+# [anthropic."claude-3-5-haiku-20241022"]
+# input_per_million_usd = 0.80
+# output_per_million_usd = 4.00
+#
+# Keep entries sorted by provider id, then model id. Update
+# `pricing-table-last-updated` in GSettings (see Preferences > Privacy)
+# whenever this file changes so the UI can show the user how stale it is.

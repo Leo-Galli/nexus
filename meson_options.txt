@@ -1,0 +1,2 @@
+option('profile', type: 'combo', choices: ['default', 'development'], value: 'default',
+  description: 'Build profile: "development" appends a Devel suffix to the app ID/icon and enables debug logging by default.')

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright GITHUB_OWNER -->
+<component type="desktop-application">
+  <id>io.github.GITHUB_OWNER.Nexus</id>
+  <name>Nexus</name>
+  <summary>Chat with AI providers and run CLI coding agents in one place</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <!--
+    metadata_license (CC0-1.0) applies only to this metainfo document's text
+    and screenshot images, as is conventional for AppStream metainfo files.
+    It is intentionally a different, narrower license than Nexus's own
+    source code license (project_license, GPL-3.0-or-later).
+  -->
+
+  <developer id="io.github.GITHUB_OWNER">
+    <name>GITHUB_OWNER</name>
+  </developer>
+  <!-- developer_name is deprecated in newer AppStream in favour of
+       developer/name above, kept here too for wider compatibility. -->
+  <developer_name>GITHUB_OWNER</developer_name>
+
+  <launchable type="desktop-id">io.github.GITHUB_OWNER.Nexus.desktop</launchable>
+
+  <url type="homepage">https://github.com/GITHUB_OWNER/nexus</url>
+  <url type="bugtracker">https://github.com/GITHUB_OWNER/nexus/issues</url>
+  <url type="vcs-browser">https://github.com/GITHUB_OWNER/nexus</url>
+
+  <description>
+    <p>
+      Nexus is a desktop application for GNOME that unifies chat access to
+      multiple AI providers and command-line coding agents in a single,
+      native GTK4/libadwaita window. It is built so that all of your
+      conversation history, automations, and usage statistics stay on your
+      own machine.
+    </p>
+    <p>
+      Key features:
+    </p>
+    <ul>
+      <li>
+        Chat side by side with multiple AI providers and models, including
+        OpenAI, Anthropic, Google Gemini, Cohere, Azure OpenAI, other
+        OpenAI-compatible endpoints, and locally running model servers such
+        as Ollama, LM Studio, or llama.cpp server
+      </li>
+      <li>
+        Launch and interact with command-line coding agents you already have
+        installed, such as Claude Code, Codex CLI, Gemini CLI, Qwen Code,
+        cursor-agent, Aider, and GitHub Copilot CLI, from a structured
+        session view
+      </li>
+      <li>
+        Build automations that chain prompts, CLI agent calls, conditions,
+        file writes, and notifications, triggered manually, on a schedule,
+        or by folder changes
+      </li>
+      <li>
+        Review local usage statistics and estimated costs across providers,
+        computed entirely on your device from a hand-maintained pricing
+        table
+      </li>
+      <li>
+        Keep API keys and credentials in the system keyring via the
+        Secret portal, and keep all conversation, automation, and usage
+        data in a local database rather than a vendor's cloud
+      </li>
+    </ul>
+    <p>
+      Nexus does not operate its own cloud service: chat requests are sent
+      directly from your device to the AI provider you configure, using
+      your own API credentials.
+    </p>
+  </description>
+
+  <provides>
+    <binary>nexus</binary>
+  </provides>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">none</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-audio">none</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">none</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+  <!--
+    Note on OARS and third-party data transmission: Nexus sends
+    user-composed chat text to whichever third-party AI provider the user
+    configures. The OARS 1.1 attribute set does not contain a category that
+    precisely describes transmitting user-entered content to a third-party
+    network service the user has configured. The closest-sounding
+    attribute, social-info ("Information sharing"), is specifically about
+    social networking features, i.e. sharing the user's own personal or
+    contact information with other people via a social platform, not about
+    an AI/API backend processing a prompt the user chose to send it, so it
+    has been left as "none" rather than stretched to cover this. Every
+    other attribute above is "none" because none of the violence, drugs,
+    sex, language, money, or gambling categories apply to Nexus. This is a
+    deliberate choice to avoid inventing or misusing an OARS value; the
+    real-world nature of the data flow, i.e. prompts going to the provider
+    the user configures, is instead described in plain language in the
+    description element above and in build-aux/flatpak/PERMISSIONS.md.
+  -->
+
+  <releases>
+    <release version="0.1.0" date="2026-10-21">
+      <description>
+        <p>
+          Initial release: multi-provider chat, CLI coding agent sessions,
+          the automation engine, and local usage statistics.
+        </p>
+      </description>
+    </release>
+  </releases>
+
+  <screenshots>
+    <!-- Placeholder screenshot. Replace with a real, appropriately hosted
+         screenshot (per Flathub's screenshot requirements) before
+         submitting to Flathub; a placeholder URL will fail review. -->
+    <screenshot type="default">
+      <image>https://example.com/placeholder-screenshot.png</image>
+      <caption>Placeholder screenshot -- replace before submitting to Flathub</caption>
+    </screenshot>
+  </screenshots>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#6366f1</color>
+    <color type="primary" scheme_preference="dark">#4338ca</color>
+  </branding>
+  <!-- Branding colors are an arbitrary starting choice (an indigo accent,
+       matching the icon palette below) and can be freely changed. -->
+
+  <keywords>
+    <keyword xml:lang="en">AI</keyword>
+    <keyword xml:lang="en">chat</keyword>
+    <keyword xml:lang="en">assistant</keyword>
+    <keyword xml:lang="en">LLM</keyword>
+    <keyword xml:lang="en">developer tools</keyword>
+    <keyword xml:lang="en">coding agent</keyword>
+    <keyword xml:lang="en">automation</keyword>
+    <keyword xml:lang="en">productivity</keyword>
+  </keywords>
+
+  <categories>
+    <category>Development</category>
+    <category>Utility</category>
+  </categories>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <recommends>
+    <display_length compare="ge">768</display_length>
+  </recommends>
+</component>

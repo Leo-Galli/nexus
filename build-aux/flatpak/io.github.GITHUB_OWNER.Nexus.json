@@ -1,0 +1,43 @@
+{
+    "app-id": "io.github.GITHUB_OWNER.Nexus",
+    "x-note-runtime": "runtime/runtime-version/sdk MUST be re-checked before building: run `flatpak remote-info flathub org.gnome.Platform` and bump this to the latest stable numbered GNOME runtime. '47' may already be superseded by the time this manifest is used.",
+    "runtime": "org.gnome.Platform",
+    "runtime-version": "47",
+    "sdk": "org.gnome.Sdk",
+    "command": "nexus",
+    "finish-args": [
+        "--share=ipc",
+        "--socket=wayland",
+        "--socket=fallback-x11",
+        "--device=dri",
+        "--share=network",
+        "--talk-name=org.freedesktop.portal.Secret",
+        "--talk-name=org.freedesktop.Flatpak"
+    ],
+    "x-note-finish-args": "See build-aux/flatpak/PERMISSIONS.md for the full justification of every entry above, including why org.freedesktop.portal.Documents and org.freedesktop.Notifications are deliberately NOT listed, and why org.freedesktop.Flatpak is present but gated behind an off-by-default in-app toggle.",
+    "modules": [
+        {
+            "name": "nexus",
+            "buildsystem": "meson",
+            "config-opts": [],
+            "build-options": {
+                "env": {
+                    "CARGO_NET_OFFLINE": "true",
+                    "CARGO_HOME": "/run/build/nexus/cargo"
+                }
+            },
+            "x-note-cargo-home": "CARGO_HOME here follows the common flatpak-cargo-generator convention of pointing CARGO_HOME at a path under the module's /run/build/<module-name>/ build directory so vendored crates and the generated cargo config are visible during the meson/cargo build step. This has NOT been verified against a real flatpak-cargo-generator run in this environment (no network access was used to fetch the tool or confirm its current output) -- double-check against the tool's generated snippet before relying on it.",
+            "sources": [
+                {
+                    "type": "dir",
+                    "path": "../.."
+                },
+                {
+                    "type": "file",
+                    "path": "cargo-sources.json"
+                }
+            ],
+            "x-note-sources": "The 'dir' source is a local-checkout convenience for development only. A real Flathub submission must replace it with {\"type\": \"git\", \"url\": \"https://github.com/GITHUB_OWNER/nexus\", \"tag\": \"vX.Y.Z\"} pointing at a tagged release. cargo-sources.json does not exist yet in this repository -- there is no Cargo.lock yet because `cargo build` has not been run -- and must be generated with flatpak-cargo-generator.py (https://github.com/flatpak/flatpak-builder-tools) against Cargo.lock once it exists. This is expected to be documented as a build step in docs/BUILDING.md."
+        }
+    ]
+}

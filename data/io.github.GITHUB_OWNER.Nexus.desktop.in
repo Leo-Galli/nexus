@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Nexus
+Comment=Chat with AI providers and CLI coding agents in one place
+Exec=nexus %U
+Icon=io.github.GITHUB_OWNER.Nexus
+Terminal=false
+Type=Application
+Categories=Development;Utility;
+StartupNotify=true
+MimeType=

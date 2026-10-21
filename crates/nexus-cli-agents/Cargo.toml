@@ -1,0 +1,17 @@
+[package]
+name = "nexus-cli-agents"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+nexus-core.workspace = true
+async-trait.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+which.workspace = true
+regex.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
