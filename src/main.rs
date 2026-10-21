@@ -59,8 +59,8 @@ fn find_resources_file() -> Option<PathBuf> {
         return Some(installed.to_path_buf());
     }
 
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(dir) = exe.parent() {
+    if let Ok(exe) = std::env::current_exe()
+        && let Some(dir) = exe.parent() {
             let next_to_exe = dir.join("nexus.gresource");
             if next_to_exe.exists() {
                 return Some(next_to_exe);
@@ -73,7 +73,6 @@ fn find_resources_file() -> Option<PathBuf> {
                 return Some(build_layout);
             }
         }
-    }
 
     None
 }

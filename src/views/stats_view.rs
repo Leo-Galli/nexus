@@ -403,11 +403,10 @@ impl StatsView {
                         return;
                     }
                 };
-                if let Some(path) = file.path() {
-                    if let Err(err) = std::fs::write(&path, csv) {
+                if let Some(path) = file.path()
+                    && let Err(err) = std::fs::write(&path, csv) {
                         tracing::error!("failed to write {}: {err}", path.display());
                     }
-                }
             },
         );
     }

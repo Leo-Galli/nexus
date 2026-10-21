@@ -38,11 +38,10 @@ fn parse_version(stdout: &str) -> Option<String> {
     if trimmed.is_empty() {
         return None;
     }
-    if let Ok(re) = regex::Regex::new(r"\d+\.\d+(?:\.\d+)?") {
-        if let Some(found) = re.find(trimmed) {
+    if let Ok(re) = regex::Regex::new(r"\d+\.\d+(?:\.\d+)?")
+        && let Some(found) = re.find(trimmed) {
             return Some(found.as_str().to_string());
         }
-    }
     trimmed.lines().next().map(|s| s.to_string())
 }
 
@@ -175,14 +174,13 @@ impl CliAgent for GenericCliAgent {
         }
         args.push(prompt.to_string());
 
-        if want_json {
-            if let Some(flag) = &self.json_flag {
+        if want_json
+            && let Some(flag) = &self.json_flag {
                 args.extend(flag.split_whitespace().map(|s| s.to_string()));
             }
             // No json_flag configured: silently no-op, mirroring the
             // "unconfirmed, not confirmed-absent" treatment used for
             // Qwen/Antigravity elsewhere in this crate.
-        }
 
         args.extend(self.extra_args.iter().cloned());
 

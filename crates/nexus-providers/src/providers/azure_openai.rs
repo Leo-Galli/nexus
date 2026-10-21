@@ -386,11 +386,10 @@ fn parse_sse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
                 })));
             }
             for choice in &chunk.choices {
-                if let Some(content) = &choice.delta.content {
-                    if !content.is_empty() {
+                if let Some(content) = &choice.delta.content
+                    && !content.is_empty() {
                         events.push(Ok(ChatEvent::TextDelta(content.clone())));
                     }
-                }
                 if let Some(reason) = &choice.finish_reason {
                     events.push(Ok(ChatEvent::Done {
                         finish_reason: map_finish_reason(Some(reason.as_str())),

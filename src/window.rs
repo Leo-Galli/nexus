@@ -212,7 +212,7 @@ impl NexusWindow {
                 self,
                 #[strong]
                 name,
-                move |_, _| window.focus_section(&name)
+                move |_, _| window.focus_section(name)
             ));
             self.add_action(&action);
         }

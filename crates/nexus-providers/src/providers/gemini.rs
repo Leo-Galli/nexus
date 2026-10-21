@@ -183,11 +183,10 @@ impl Provider for GeminiProvider {
         let key = self.require_api_key().await?;
 
         let mut system_parts = Vec::new();
-        if let Some(system) = &request.system_prompt {
-            if !system.is_empty() {
+        if let Some(system) = &request.system_prompt
+            && !system.is_empty() {
                 system_parts.push(system.clone());
             }
-        }
 
         let mut contents = Vec::new();
         for m in &request.messages {
@@ -335,11 +334,10 @@ fn parse_gemini_chunk(json: &str) -> ProviderResult<Vec<ChatEvent>> {
     for candidate in chunk.candidates {
         if let Some(content) = candidate.content {
             for part in content.parts {
-                if let Some(text) = part.text {
-                    if !text.is_empty() {
+                if let Some(text) = part.text
+                    && !text.is_empty() {
                         events.push(ChatEvent::TextDelta(text));
                     }
-                }
             }
         }
         if let Some(reason) = candidate.finish_reason {

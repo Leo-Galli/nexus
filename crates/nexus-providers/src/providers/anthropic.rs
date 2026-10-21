@@ -184,11 +184,10 @@ impl Provider for AnthropicProvider {
         let key = self.require_api_key().await?;
 
         let mut system_parts = Vec::new();
-        if let Some(system) = &request.system_prompt {
-            if !system.is_empty() {
+        if let Some(system) = &request.system_prompt
+            && !system.is_empty() {
                 system_parts.push(system.clone());
             }
-        }
 
         let mut messages = Vec::new();
         for m in &request.messages {
@@ -362,11 +361,10 @@ fn parse_anthropic_event(
             let parsed: AnthropicContentBlockDelta = serde_json::from_str(data).map_err(|e| {
                 ProviderError::InvalidResponse(format!("malformed content_block_delta: {e}"))
             })?;
-            if parsed.delta.kind == "text_delta" {
-                if let Some(text) = parsed.delta.text {
+            if parsed.delta.kind == "text_delta"
+                && let Some(text) = parsed.delta.text {
                     return Ok(vec![ChatEvent::TextDelta(text)]);
                 }
-            }
             Ok(Vec::new())
         }
         "message_delta" => {

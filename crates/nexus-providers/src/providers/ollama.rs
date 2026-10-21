@@ -292,11 +292,10 @@ fn parse_line(line: &[u8]) -> Option<Vec<ProviderResult<ChatEvent>>> {
     match serde_json::from_str::<OllamaStreamLine>(trimmed) {
         Ok(line) => {
             let mut events = Vec::new();
-            if let Some(message) = &line.message {
-                if !message.content.is_empty() {
+            if let Some(message) = &line.message
+                && !message.content.is_empty() {
                     events.push(Ok(ChatEvent::TextDelta(message.content.clone())));
                 }
-            }
             if line.done {
                 events.push(Ok(ChatEvent::Usage(TokenUsage {
                     input_tokens: line.prompt_eval_count.unwrap_or(0),

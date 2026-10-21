@@ -190,11 +190,10 @@ impl SecretStore for KeyringSecretStore {
                 .await
                 .map_err(|err| SecretError::Backend(err.to_string()))?;
 
-            if let Some(provider) = item_attrs.get(PROVIDER_ATTRIBUTE) {
-                if !providers.contains(provider) {
+            if let Some(provider) = item_attrs.get(PROVIDER_ATTRIBUTE)
+                && !providers.contains(provider) {
                     providers.push(provider.clone());
                 }
-            }
         }
 
         Ok(providers)

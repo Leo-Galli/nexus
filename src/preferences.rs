@@ -315,15 +315,14 @@ impl NexusPreferences {
             #[weak]
             row,
             move |_| {
-                if let Some(summary) = row.summary() {
-                    if let Some(url) = summary.api_key_url {
+                if let Some(summary) = row.summary()
+                    && let Some(url) = summary.api_key_url {
                         gtk::UriLauncher::new(url).launch(
                             None::<&gtk::Window>,
                             gio::Cancellable::NONE,
                             |_| {},
                         );
                     }
-                }
             }
         ));
         row_imp.launch_login_button.connect_clicked(glib::clone!(

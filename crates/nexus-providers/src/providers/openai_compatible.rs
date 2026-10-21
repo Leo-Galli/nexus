@@ -400,15 +400,14 @@ impl Provider for OpenAiCompatibleProvider {
         let key = self.resolve_api_key().await?;
 
         let mut messages = Vec::new();
-        if let Some(system) = &request.system_prompt {
-            if !system.is_empty() {
+        if let Some(system) = &request.system_prompt
+            && !system.is_empty() {
                 messages.push(OpenAiMessage {
                     role: "system".to_string(),
                     content: system.clone(),
                     tool_call_id: None,
                 });
             }
-        }
         for m in &request.messages {
             messages.push(OpenAiMessage {
                 role: role_to_str(m.role).to_string(),

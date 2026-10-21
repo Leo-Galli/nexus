@@ -47,11 +47,10 @@ fn parse_version(stdout: &str) -> Option<String> {
     if trimmed.is_empty() {
         return None;
     }
-    if let Ok(re) = regex::Regex::new(r"\d+\.\d+(?:\.\d+)?") {
-        if let Some(found) = re.find(trimmed) {
+    if let Ok(re) = regex::Regex::new(r"\d+\.\d+(?:\.\d+)?")
+        && let Some(found) = re.find(trimmed) {
             return Some(found.as_str().to_string());
         }
-    }
     trimmed.lines().next().map(|s| s.to_string())
 }
 
